@@ -203,9 +203,9 @@ class ReportsExportPDFView(APIView):
             p.setFont('Helvetica-Bold', 14)
             p.drawString(x + 10, y + 12, value)
 
-        draw_card(card_x, card_y, card_w, card_h, 'TOTAL REVENU', f"{total_revenue:,} $")
+        draw_card(card_x, card_y, card_w, card_h, 'TOTAL REVENU', f"{total_revenue:,} FCFA")
         draw_card(card_x + card_w + 10, card_y, card_w, card_h, 'TOTAL CLIENTS', str(total_clients))
-        draw_card(card_x + 2 * (card_w + 10), card_y, card_w, card_h, 'PANIER MOYEN', f"{avg_basket:,} $")
+        draw_card(card_x + 2 * (card_w + 10), card_y, card_w, card_h, 'PANIER MOYEN', f"{avg_basket:,} FCFA")
 
         y = card_y - 30
 
@@ -243,7 +243,7 @@ class ReportsExportPDFView(APIView):
             p.rect(bar_x, y - 6, fill_w, 10, stroke=0, fill=1)
             # revenue (right aligned)
             p.setFillColor(colors.black)
-            p.drawRightString(width - margin, y, f"{r.get('revenue', 0):,} $")
+            p.drawRightString(width - margin, y, f"{r.get('revenue', 0):,} FCFA")
             y -= 20
 
         p.showPage()
