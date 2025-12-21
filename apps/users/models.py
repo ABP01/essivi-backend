@@ -18,12 +18,19 @@ class AgentProfile(models.Model):
     tricycle = models.ForeignKey('logistics.Tricycle', on_delete=models.SET_NULL, null=True, blank=True)
     zone_assignee = models.CharField(max_length=100, blank=True)
 
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    identification_number = models.CharField(max_length=100, blank=True, null=True)
+    tricycle_plate = models.CharField(max_length=50, blank=True, null=True)
+
     def __str__(self):
         return f"Agent: {self.user.username}"
 
 class ClientProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='client_profile')
     nom_point_vente = models.CharField(max_length=100)
+    nom_proprietaire = models.CharField(max_length=100, blank=True, null=True)
+    adresse = models.CharField(max_length=255, blank=True, null=True)
     # Using simple chars for GPS for now, can upgrade to GeoDjango PointField later if PostGIS is set up
     gps_lat = models.FloatField(null=True, blank=True)
     gps_lng = models.FloatField(null=True, blank=True)

@@ -12,6 +12,7 @@ class Commande(models.Model):
     # Agent might be null initially
     agent = models.ForeignKey('users.CustomUser', on_delete=models.SET_NULL, null=True, blank=True, related_name='commandes_agent')
     statut = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    montant = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     date_souhaitee = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
