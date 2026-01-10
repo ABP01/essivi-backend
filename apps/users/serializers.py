@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, AgentProfile, ClientProfile
+from .models import CustomUser, AgentProfile, ClientProfile, UserPreferences
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -194,3 +194,29 @@ class ClientProfileSerializer(serializers.ModelSerializer):
 
     def get_lng(self, obj):
         return obj.gps_lng if obj.gps_lng is not None else None
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """Serializer for password change endpoint"""
+    current_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True, min_length=6)
+    confirm_password = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match"})
+        return data
+
+    def validate_current_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Current password is incorrect")
+        return value
+
+class UserPreferencesSerializer(serializers.ModelSerializer):
+    """Serializer for user preferences"""
+    class Meta:
+        model = UserPreferences
+        fields = ['id', 'notifications_enabled', 'email_notifications', 'sms_notifications', 'language', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+

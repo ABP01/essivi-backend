@@ -9,6 +9,7 @@ from io import BytesIO
 @permission_classes([AllowAny])
 def export_report(request):
     fmt = request.GET.get('format', 'csv')
+    rtype = request.GET.get('type', 'deliveries')
     from_ts = request.GET.get('from')
     to_ts = request.GET.get('to')
 
@@ -22,36 +23,75 @@ def export_report(request):
     except Exception:
         dt_to = None
 
-    # Collect data: simple deliveries list from sales.Livraison if available
+    # Collect data depending on requested type: deliveries or orders
+    rows = []
     try:
-        from apps.sales.models import Livraison
-        qs = Livraison.objects.all()
-        if dt_from:
-            qs = qs.filter(timestamp__gte=dt_from)
-        if dt_to:
-            qs = qs.filter(timestamp__lte=dt_to)
-        rows = []
-        for l in qs.order_by('timestamp'):
-            rows.append({
-                'id': l.id,
-                'client': str(l.client),
-                'timestamp': l.timestamp.isoformat(),
-                'lat': l.gps_lat,
-                'lng': l.gps_lng,
-            })
+        if rtype in ('deliveries', 'livraisons'):
+            from apps.sales.models import Livraison
+            qs = Livraison.objects.all()
+            if dt_from:
+                qs = qs.filter(timestamp__gte=dt_from)
+            if dt_to:
+                qs = qs.filter(timestamp__lte=dt_to)
+            for l in qs.order_by('timestamp'):
+                rows.append({
+                    'id': l.id,
+                    'client': str(l.client),
+                    'timestamp': l.timestamp.isoformat(),
+                    'lat': l.gps_lat,
+                    'lng': l.gps_lng,
+                })
+        elif rtype in ('orders', 'commandes'):
+            from apps.sales.models import Commande
+            qs = Commande.objects.all()
+            if dt_from:
+                qs = qs.filter(created_at__gte=dt_from)
+            if dt_to:
+                qs = qs.filter(created_at__lte=dt_to)
+            for c in qs.order_by('created_at'):
+                rows.append({
+                    'id': c.id,
+                    'client': str(c.client),
+                    'status': getattr(c, 'statut', getattr(c, 'status', '')),
+                    'amount': float(c.montant) if c.montant is not None else 0,
+                    'requested_at': c.date_souhaitee.isoformat() if c.date_souhaitee else '',
+                    'created_at': c.created_at.isoformat() if c.created_at else '',
+                })
+        else:
+            # unknown type: fallback to deliveries behavior
+            from apps.sales.models import Livraison
+            qs = Livraison.objects.all()
+            for l in qs.order_by('timestamp'):
+                rows.append({
+                    'id': l.id,
+                    'client': str(l.client),
+                    'timestamp': l.timestamp.isoformat(),
+                    'lat': l.gps_lat,
+                    'lng': l.gps_lng,
+                })
     except Exception:
-        # fallback sample data
+        # generic fallback sample row
         rows = [
-            {'id': 1, 'client': 'Client A', 'timestamp': timezone.now().isoformat(), 'lat': None, 'lng': None},
+            {'id': 1, 'client': 'Client A', 'timestamp': timezone.now().isoformat()},
         ]
 
     if fmt == 'csv':
         import csv, io
         buffer = io.StringIO()
         writer = csv.writer(buffer)
-        writer.writerow(['id', 'client', 'timestamp', 'lat', 'lng'])
-        for r in rows:
-            writer.writerow([r['id'], r['client'], r['timestamp'], r['lat'] or '', r['lng'] or ''])
+        # Write headers depending on requested type
+        if rtype in ('deliveries', 'livraisons'):
+            writer.writerow(['id', 'client', 'timestamp', 'lat', 'lng'])
+            for r in rows:
+                writer.writerow([r.get('id'), r.get('client'), r.get('timestamp', ''), r.get('lat') or '', r.get('lng') or ''])
+        elif rtype in ('orders', 'commandes'):
+            writer.writerow(['id', 'client', 'status', 'amount', 'requested_at', 'created_at'])
+            for r in rows:
+                writer.writerow([r.get('id'), r.get('client'), r.get('status', ''), r.get('amount', ''), r.get('requested_at', ''), r.get('created_at', '')])
+        else:
+            writer.writerow(['id', 'client', 'timestamp', 'lat', 'lng'])
+            for r in rows:
+                writer.writerow([r.get('id'), r.get('client'), r.get('timestamp', ''), r.get('lat') or '', r.get('lng') or ''])
         resp = HttpResponse(buffer.getvalue(), content_type='text/csv; charset=utf-8')
         resp['Content-Disposition'] = 'attachment; filename="reports.csv"'
         return resp
@@ -61,9 +101,18 @@ def export_report(request):
             import openpyxl
             wb = openpyxl.Workbook()
             ws = wb.active
-            ws.append(['id', 'client', 'timestamp', 'lat', 'lng'])
-            for r in rows:
-                ws.append([r['id'], r['client'], r['timestamp'], r['lat'], r['lng']])
+            if rtype in ('deliveries', 'livraisons'):
+                ws.append(['id', 'client', 'timestamp', 'lat', 'lng'])
+                for r in rows:
+                    ws.append([r.get('id'), r.get('client'), r.get('timestamp', ''), r.get('lat'), r.get('lng')])
+            elif rtype in ('orders', 'commandes'):
+                ws.append(['id', 'client', 'status', 'amount', 'requested_at', 'created_at'])
+                for r in rows:
+                    ws.append([r.get('id'), r.get('client'), r.get('status', ''), r.get('amount', ''), r.get('requested_at', ''), r.get('created_at', '')])
+            else:
+                ws.append(['id', 'client', 'timestamp', 'lat', 'lng'])
+                for r in rows:
+                    ws.append([r.get('id'), r.get('client'), r.get('timestamp', ''), r.get('lat'), r.get('lng')])
             bio = BytesIO()
             wb.save(bio)
             bio.seek(0)
@@ -83,10 +132,16 @@ def export_report(request):
             c.setFont('Helvetica', 10)
             c.drawString(40, y, 'Report')
             y -= 30
-            c.drawString(40, y, 'id | client | timestamp | lat | lng')
+            if rtype in ('orders', 'commandes'):
+                c.drawString(40, y, 'id | client | status | amount | requested_at')
+            else:
+                c.drawString(40, y, 'id | client | timestamp | lat | lng')
             y -= 20
             for r in rows:
-                line = f"{r['id']} | {r['client']} | {r['timestamp']} | {r['lat'] or ''} | {r['lng'] or ''}"
+                if rtype in ('orders', 'commandes'):
+                    line = f"{r.get('id')} | {r.get('client')} | {r.get('status','')} | {r.get('amount','')} | {r.get('requested_at','')}"
+                else:
+                    line = f"{r.get('id')} | {r.get('client')} | {r.get('timestamp','')} | {r.get('lat') or ''} | {r.get('lng') or ''}"
                 c.drawString(40, y, line[:120])
                 y -= 14
                 if y < 60:

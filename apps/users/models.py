@@ -38,3 +38,21 @@ class ClientProfile(models.Model):
 
     def __str__(self):
         return self.nom_point_vente
+
+class UserPreferences(models.Model):
+    """User preferences for settings like notifications and language"""
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='preferences')
+    notifications_enabled = models.BooleanField(default=True)
+    email_notifications = models.BooleanField(default=True)
+    sms_notifications = models.BooleanField(default=False)
+    language = models.CharField(max_length=10, default='fr', choices=[
+        ('fr', 'Français'),
+        ('en', 'English'),
+        ('es', 'Español'),
+    ])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Preferences for {self.user.username}"
+

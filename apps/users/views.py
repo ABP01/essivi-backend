@@ -64,3 +64,54 @@ class MeView(APIView):
     def get(self, request):
         serializer = CustomUserSerializer(request.user)
         return Response(serializer.data)
+
+class ChangePasswordView(APIView):
+    """API endpoint for changing user password"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        request=None,
+        responses={200: None},
+        description="Change user password"
+    )
+    def post(self, request):
+        from .serializers import ChangePasswordSerializer
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        
+        if serializer.is_valid():
+            # Set new password
+            request.user.set_password(serializer.validated_data['new_password'])
+            request.user.save()
+            
+            return Response({
+                'message': 'Password changed successfully'
+            }, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserPreferencesView(APIView):
+    """API endpoint for getting and updating user preferences"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        from .serializers import UserPreferencesSerializer
+        from .models import UserPreferences
+        
+        # Get or create preferences for the user
+        preferences, created = UserPreferences.objects.get_or_create(user=request.user)
+        serializer = UserPreferencesSerializer(preferences)
+        return Response(serializer.data)
+
+    def put(self, request):
+        from .serializers import UserPreferencesSerializer
+        from .models import UserPreferences
+        
+        preferences, created = UserPreferences.objects.get_or_create(user=request.user)
+        serializer = UserPreferencesSerializer(preferences, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

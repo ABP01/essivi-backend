@@ -20,6 +20,12 @@ class DashboardStatsView(APIView):
         description="Get dashboard statistics (count of orders, deliveries, etc.)"
     )
     def get(self, request):
+        # Only allow the admin user 'elom' or users with role 'admin' / is_superuser
+        user = request.user
+        user_role = getattr(user, 'role', None)
+        if not (user.username == 'elom' or user.is_superuser or user_role == 'admin'):
+            return Response({'detail': 'Accès au dashboard réservé à l\'administrateur.'}, status=403)
+
         now = timezone.now()
         
         # 1. Summary KPIs
