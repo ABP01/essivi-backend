@@ -5,9 +5,19 @@ from .models import Commande, Livraison, Notification, BottleReturn, Subscriptio
 from .serializers import CommandeSerializer, LivraisonSerializer, NotificationSerializer, BottleReturnSerializer, SubscriptionSerializer, FAQSerializer
 
 class CommandeViewSet(viewsets.ModelViewSet):
-    queryset = Commande.objects.all()
+    queryset = Commande.objects.all()  # Requis pour le router DRF
     serializer_class = CommandeSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        role = getattr(user, 'role', 'client')
+        
+        if user.is_superuser or role in ['admin', 'gestionnaire']:
+            return Commande.objects.all()
+        elif role == 'agent':
+            return Commande.objects.filter(agent=user)
+        return Commande.objects.filter(client=user)
     
     @action(detail=True, methods=['post'])
     def assign(self, request, pk=None):
@@ -37,9 +47,20 @@ class CommandeViewSet(viewsets.ModelViewSet):
             )
 
 class LivraisonViewSet(viewsets.ModelViewSet):
-    queryset = Livraison.objects.all()
+    queryset = Livraison.objects.all()  # Requis pour le router DRF
     serializer_class = LivraisonSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        role = getattr(user, 'role', 'client')
+        
+        if user.is_superuser or role in ['admin', 'gestionnaire']:
+            return Livraison.objects.all()
+        elif role == 'agent':
+            # Filtrer par le tricycle assigné à l'agent (logique Tournee)
+            return Livraison.objects.filter(tournee__agent=user)
+        return Livraison.objects.filter(client=user)
     
     @action(detail=True, methods=['post'])
     def submit_proof(self, request, pk=None):
@@ -68,6 +89,7 @@ class LivraisonViewSet(viewsets.ModelViewSet):
 
 class NotificationViewSet(viewsets.ModelViewSet):
     """ViewSet for user notifications"""
+    queryset = Notification.objects.all()  # Requis pour le router DRF
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
     
@@ -92,6 +114,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
 class BottleReturnViewSet(viewsets.ModelViewSet):
     """ViewSet for bottle return requests"""
+    queryset = BottleReturn.objects.all()  # Requis pour le router DRF
     serializer_class = BottleReturnSerializer
     permission_classes = [permissions.IsAuthenticated]
     
@@ -107,6 +130,7 @@ class BottleReturnViewSet(viewsets.ModelViewSet):
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
     """ViewSet for client subscriptions"""
+    queryset = Subscription.objects.all()  # Requis pour le router DRF
     serializer_class = SubscriptionSerializer
     permission_classes = [permissions.IsAuthenticated]
     

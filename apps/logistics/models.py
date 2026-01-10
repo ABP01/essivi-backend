@@ -26,3 +26,24 @@ class Tournee(models.Model):
     
     def __str__(self):
         return f"Tournée {self.id} - {self.agent}"
+
+class LocationHistory(models.Model):
+    """Historique des positions GPS des agents pour tracking et analytics"""
+    agent = models.ForeignKey('users.AgentProfile', on_delete=models.CASCADE, related_name='location_history')
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    accuracy = models.FloatField(null=True, blank=True, help_text="Précision en mètres")
+    speed = models.FloatField(null=True, blank=True, help_text="Vitesse en km/h")
+    heading = models.FloatField(null=True, blank=True, help_text="Direction en degrés")
+    
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['agent', '-timestamp']),
+        ]
+        verbose_name = "Historique de position"
+        verbose_name_plural = "Historiques de positions"
+    
+    def __str__(self):
+        return f"Position - {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"

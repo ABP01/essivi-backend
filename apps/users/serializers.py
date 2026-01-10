@@ -7,12 +7,22 @@ class CustomUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role', 'phone_number', 'is_active']
         read_only_fields = ['id']
 
+from django.contrib.auth.password_validation import validate_password
+from django.core import exceptions
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     
     class Meta:
         model = CustomUser
         fields = ['username', 'password', 'email', 'role', 'phone_number', 'first_name', 'last_name']
+
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except exceptions.ValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+        return value
 
     def create(self, validated_data):
         # create user and set optional first/last name when provided

@@ -30,32 +30,47 @@ class LogoutView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class CustomUserViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
+    queryset = CustomUser.objects.all()  # Requis pour le router DRF
     serializer_class = CustomUserSerializer
-    # Allow read-only (GET) access to anonymous users for development UI convenience;
-    # require authentication for mutating actions.
-    def get_permissions(self):
-        if self.request and self.request.method in permissions.SAFE_METHODS:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        role = getattr(user, 'role', 'client')
+        
+        if user.is_superuser or role in ['admin', 'gestionnaire']:
+            return CustomUser.objects.all()
+        # Un utilisateur ne peut voir que son propre compte via ce ViewSet
+        return CustomUser.objects.filter(id=user.id)
 
 class AgentProfileViewSet(viewsets.ModelViewSet):
-    queryset = AgentProfile.objects.all()
+    queryset = AgentProfile.objects.all()  # Requis pour le router DRF
     serializer_class = AgentProfileSerializer
-    # Allow read-only (GET) access to anonymous users for development UI convenience;
-    # require authentication for mutating actions.
-    def get_permissions(self):
-        if self.request and self.request.method in permissions.SAFE_METHODS:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        role = getattr(user, 'role', 'client')
+        
+        if user.is_superuser or role in ['admin', 'gestionnaire']:
+            return AgentProfile.objects.all()
+        # Clients peuvent voir les profils des agents pour les commandes en cours
+        return AgentProfile.objects.all() # On garde permissif pour l'instant car l'UI en a besoin
 
 class ClientProfileViewSet(viewsets.ModelViewSet):
-    queryset = ClientProfile.objects.all()
+    queryset = ClientProfile.objects.all()  # Requis pour le router DRF
     serializer_class = ClientProfileSerializer
-    def get_permissions(self):
-        if self.request and self.request.method in permissions.SAFE_METHODS:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        role = getattr(user, 'role', 'client')
+        
+        if user.is_superuser or role in ['admin', 'gestionnaire']:
+            return ClientProfile.objects.all()
+        elif role == 'client':
+            return ClientProfile.objects.filter(user=user)
+        return ClientProfile.objects.none() # Agents ne voient pas tous les profils clients par défaut
 
 
 class MeView(APIView):
