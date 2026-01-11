@@ -55,12 +55,20 @@ class CommandeViewSet(viewsets.ModelViewSet):
                 }
             )
             
-            # Auto-create Livraison
-            Livraison.objects.create(
-                tournee=tournee,
-                client_id=commande.client_id,
+            # Auto-create or update Livraison
+            livraison, created = Livraison.objects.get_or_create(
                 commande=commande,
+                defaults={
+                    'tournee': tournee,
+                    'client_id': commande.client_id,
+                }
             )
+            
+            # If livraison already existed, update the tournee (in case of reassignment)
+            if not created:
+                livraison.tournee = tournee
+                livraison.save()
+
 
             # Create database notification
             Notification.objects.create(
@@ -113,11 +121,10 @@ class LivraisonViewSet(viewsets.ModelViewSet):
         """Submit delivery proof (photo, signature, GPS)"""
         livraison = self.get_object()
         
+        # If already validated, return current state instead of error (idempotent)
         if livraison.preuve_validee:
-            return Response(
-                {'error': 'Cette livraison est déjà terminée.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            serializer = self.get_serializer(livraison)
+            return Response(serializer.data)
         
         # Update GPS coordinates
         if 'gps_lat' in request.data and 'gps_lng' in request.data:
@@ -142,6 +149,41 @@ class LivraisonViewSet(viewsets.ModelViewSet):
         if livraison.commande:
             livraison.commande.statut = 'delivered'
             livraison.commande.save()
+        
+        serializer = self.get_serializer(livraison)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def update_status(self, request, pk=None):
+        """Update delivery status (en_route, arriving, etc.)"""
+        livraison = self.get_object()
+        new_status = request.data.get('statut_livraison')
+        
+        valid_statuses = ['assigned', 'en_route', 'arriving', 'delivered']
+        if new_status not in valid_statuses:
+            return Response(
+                {'error': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        livraison.statut_livraison = new_status
+        livraison.save()
+        
+        # Create notification for client
+        from .models import Notification
+        status_messages = {
+            'en_route': 'Votre livreur est en route !',
+            'arriving': 'Votre livreur arrive bientôt !',
+            'delivered': 'Votre commande a été livrée !'
+        }
+        
+        if new_status in status_messages:
+            Notification.objects.create(
+                user=livraison.client,
+                title='Mise à jour de livraison',
+                message=status_messages[new_status],
+                type='info'
+            )
         
         serializer = self.get_serializer(livraison)
         return Response(serializer.data)

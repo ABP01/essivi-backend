@@ -24,6 +24,20 @@ class Livraison(models.Model):
     tournee = models.ForeignKey('logistics.Tournee', on_delete=models.CASCADE)
     commande = models.OneToOneField(Commande, on_delete=models.CASCADE, null=True, blank=True)
     client = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE)
+    
+    # Delivery status
+    statut_livraison = models.CharField(
+        max_length=20,
+        choices=[
+            ('assigned', 'Assignée'),
+            ('en_route', 'En route'),
+            ('arriving', 'Arrive bientôt'),
+            ('delivered', 'Livrée'),
+        ],
+        default='assigned',
+        help_text="Statut de progression de la livraison"
+    )
+    
     gps_lat = models.FloatField(null=True, blank=True)
     gps_lng = models.FloatField(null=True, blank=True)
     photo_preuve = models.ImageField(upload_to='livraisons/', null=True, blank=True)

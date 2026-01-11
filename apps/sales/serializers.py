@@ -2,8 +2,10 @@ from rest_framework import serializers
 from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ
 
 class CommandeSerializer(serializers.ModelSerializer):
-    client_name = serializers.CharField(source='client.get_full_name', read_only=True)
-    agent_name = serializers.CharField(source='agent.get_full_name', read_only=True, allow_null=True)
+    client_name = serializers.CharField(source='client.username', read_only=True)
+    client_phone = serializers.CharField(source='client.phone_number', read_only=True)
+    agent_name = serializers.CharField(source='agent.username', read_only=True, allow_null=True)
+    agent_phone = serializers.CharField(source='agent.phone_number', read_only=True, allow_null=True)
     agent_id = serializers.IntegerField(source='agent.id', read_only=True, allow_null=True)
     
     class Meta:
@@ -11,6 +13,50 @@ class CommandeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LivraisonSerializer(serializers.ModelSerializer):
+    client_phone = serializers.CharField(source='client.phone_number', read_only=True)
+    client_name = serializers.SerializerMethodField()
+    agent_phone = serializers.SerializerMethodField()
+    agent_name = serializers.SerializerMethodField()
+    amount = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
+    
+    def get_client_name(self, obj):
+        # Try to get from linked commande first, fallback to user
+        if obj.commande and obj.commande.client:
+            return obj.commande.client.username
+        return obj.client.username if obj.client else None
+    
+    def get_agent_phone(self, obj):
+        # Get agent phone from tournee
+        if obj.tournee and obj.tournee.agent:
+            return obj.tournee.agent.phone_number
+        return None
+    
+    def get_agent_name(self, obj):
+        # Get agent name from tournee
+        if obj.tournee and obj.tournee.agent:
+            return obj.tournee.agent.username
+        # Or from linked commande
+        elif obj.commande and obj.commande.agent:
+            return obj.commande.agent.username
+        return None
+    
+    def get_amount(self, obj):
+        # Get amount from linked commande
+        if obj.commande:
+            return float(obj.commande.montant)
+        return 0.0
+    
+    def get_address(self, obj):
+        # Try to get from client profile or commande
+        if obj.client and hasattr(obj.client, 'client_profile'):
+            profile = obj.client.client_profile
+            if profile.formatted_address:
+                return profile.formatted_address
+            elif profile.adresse:
+                return profile.adresse
+        return ''
+    
     class Meta:
         model = Livraison
         fields = '__all__'
