@@ -28,6 +28,7 @@ class Livraison(models.Model):
     gps_lng = models.FloatField(null=True, blank=True)
     photo_preuve = models.ImageField(upload_to='livraisons/', null=True, blank=True)
     signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
+    preuve_validee = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

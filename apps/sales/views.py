@@ -21,7 +21,7 @@ class CommandeViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def assign(self, request, pk=None):
-        """Assign an agent to a command"""
+        """Assign an agent to a command and auto-create Livraison"""
         commande = self.get_object()
         agent_id = request.data.get('agent_id')
         
@@ -33,10 +33,56 @@ class CommandeViewSet(viewsets.ModelViewSet):
         
         try:
             from apps.users.models import CustomUser
+            from django.utils import timezone
+            from apps.logistics.models import Tournee
+            from datetime import date
             agent = CustomUser.objects.get(id=agent_id, role='agent')
             commande.agent = agent
             commande.statut = 'validated'  # Update status when assigned
             commande.save()
+            
+            # Auto-create a Tournee for today if it doesn't exist
+            today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            today_end = timezone.now().replace(hour=23, minute=59, second=59, microsecond=999999)
+            
+            tournee, created = Tournee.objects.get_or_create(
+                agent=agent,
+                date_debut__gte=today_start,
+                date_debut__lte=today_end,
+                defaults={
+                    'date_debut': timezone.now(),
+                    'stock_initial': 0
+                }
+            )
+            
+            # Auto-create Livraison
+            Livraison.objects.create(
+                tournee=tournee,
+                client_id=commande.client_id,
+                commande=commande,
+            )
+
+            # Create database notification
+            Notification.objects.create(
+                user=agent,
+                title="Nouvelle commande",
+                message=f"La commande #{commande.id} vous a été assignée.",
+                type="info"
+            )
+
+            # Send real-time notification to the agent
+            from asgiref.sync import async_to_sync
+            from channels.layers import get_channel_layer
+            
+            channel_layer = get_channel_layer()
+            if channel_layer:
+                async_to_sync(channel_layer.group_send)(
+                    f"user_{agent.id}",
+                    {
+                        "type": "send_notification",
+                        "message": f"Nouvelle commande assignée : {commande.id}"
+                    }
+                )
             
             serializer = self.get_serializer(commande)
             return Response(serializer.data)
@@ -67,13 +113,21 @@ class LivraisonViewSet(viewsets.ModelViewSet):
         """Submit delivery proof (photo, signature, GPS)"""
         livraison = self.get_object()
         
+        if livraison.preuve_validee:
+            return Response(
+                {'error': 'Cette livraison est déjà terminée.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         # Update GPS coordinates
         if 'gps_lat' in request.data and 'gps_lng' in request.data:
             livraison.gps_lat = request.data['gps_lat']
             livraison.gps_lng = request.data['gps_lng']
         
-        # Update signature (base64 encoded)
-        if 'signature' in request.data:
+        # Update signature (file upload)
+        if 'signature' in request.FILES:
+            livraison.signature = request.FILES['signature']
+        elif 'signature' in request.data:
             livraison.signature = request.data['signature']
         
         # Update photo proof
@@ -83,6 +137,11 @@ class LivraisonViewSet(viewsets.ModelViewSet):
         # Mark proof as validated
         livraison.preuve_validee = True
         livraison.save()
+        
+        # Update associated command status
+        if livraison.commande:
+            livraison.commande.statut = 'delivered'
+            livraison.commande.save()
         
         serializer = self.get_serializer(livraison)
         return Response(serializer.data)

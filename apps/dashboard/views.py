@@ -42,7 +42,28 @@ class DashboardStatsView(APIView):
         # Tricycle model uses `status` with choices ('active','maintenance','inactive')
         active_tricycles = Tricycle.objects.filter(status='active').count()
 
-        # 2. Revenue Chart (Last 6 months)
+        # 2. Advanced Metrics
+        delivered_orders = Commande.objects.filter(statut='delivered')
+        avg_delivery_time_minutes = 0
+        if delivered_orders.exists():
+            # Calculate average time in minutes between creation and delivery
+            total_seconds = sum((o.updated_at - o.created_at).total_seconds() for o in delivered_orders)
+            avg_delivery_time_minutes = int((total_seconds / delivered_orders.count()) / 60)
+
+        # Agent Performance
+        agent_perf = AgentProfile.objects.annotate(
+            delivery_count=Count('user__commandes_agent', filter=models.Q(user__commandes_agent__statut='delivered'))
+        ).select_related('user').order_by('-delivery_count')[:5]
+
+        formatted_agent_perf = [
+            {
+                "name": f"{a.user.first_name} {a.user.last_name}" if a.user.first_name else a.user.username,
+                "deliveries": a.delivery_count,
+                "photo": a.photo.url if a.photo else None
+            } for a in agent_perf
+        ]
+
+        # 3. Revenue Chart (Last 6 months)
         six_months_ago = now - timedelta(days=30*6)
         revenue_data = Commande.objects.filter(
             statut='delivered',
@@ -56,11 +77,11 @@ class DashboardStatsView(APIView):
         formatted_revenue_chart = [
             {
                 "month": item['month'].strftime("%b"), 
-                "revenue": item['revenue']
+                "revenue": float(item['revenue'])
             } for item in revenue_data
         ]
         
-        # 3. Delivery Chart (Last 7 days)
+        # 4. Delivery Chart (Last 7 days)
         seven_days_ago = now - timedelta(days=6) # 7 days including today
         delivery_data = Livraison.objects.filter(
             timestamp__gte=seven_days_ago
@@ -83,15 +104,17 @@ class DashboardStatsView(APIView):
 
         return Response({
             'kpis': {
-                'total_revenue': total_revenue,
+                'total_revenue': float(total_revenue),
                 'total_deliveries': total_livraisons,
                 'total_pending_orders': total_pending_orders,
                 'active_agents': active_agents,
                 'active_clients': active_clients,
                 'active_tricycles': active_tricycles,
+                'avg_delivery_time': avg_delivery_time_minutes,
             },
             'charts': {
                 'revenue': formatted_revenue_chart,
                 'deliveries': formatted_delivery_chart
-            }
+            },
+            'agent_performance': formatted_agent_perf
         })

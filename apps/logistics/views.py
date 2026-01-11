@@ -124,7 +124,7 @@ class NearestAgentsView(APIView):
                 'latitude': agent.latitude,
                 'longitude': agent.longitude,
                 'distance_km': round(distance, 2),
-                'current_deliveries': agent.user.livraisons_set.filter(preuve_validee=False).count()
+                'current_deliveries': Livraison.objects.filter(tournee__agent=agent.user, preuve_validee=False).count()
             })
         
         return Response(result, status=status.HTTP_200_OK)
