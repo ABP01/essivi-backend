@@ -1,0 +1,175 @@
+# =============================================================================
+# Docker Compose - Essivi Backend Infrastructure
+# Services: Traefik, PostgreSQL, MongoDB, Redis, Django Backend
+# =============================================================================
+
+services:
+  # -------------------------------------------------------------------------
+  # Traefik - Reverse Proxy & Load Balancer
+  # -------------------------------------------------------------------------
+  traefik:
+    image: traefik:v3.0
+    container_name: essivi-traefik
+    command:
+      # API & Dashboard
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      # Docker provider
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=essivi-network"
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Logging
+      - "--log.level=INFO"
+      - "--accesslog=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Traefik Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - essivi-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Dashboard routing
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=web"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+
+  # -------------------------------------------------------------------------
+  # PostgreSQL - Primary Database
+  # -------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: essivi-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-essivi}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-essivi}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - essivi-network
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # Redis - Cache & Django Channels
+  # -------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: essivi-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - essivi-network
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # MongoDB - Analytics Database
+  # -------------------------------------------------------------------------
+  mongo:
+    image: mongo:6
+    container_name: essivi-mongo
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-essivi_analytics}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - essivi-network
+    restart: unless-stopped
+
+  # -------------------------------------------------------------------------
+  # Django Backend - ASGI Application
+  # -------------------------------------------------------------------------
+  backend:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile
+    container_name: essivi-backend
+    env_file:
+      - .env
+    environment:
+      # Override hosts to use Docker service names
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_HOST: redis
+      MONGO_URI: mongodb://mongo:27017
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    volumes:
+      # Persistent storage for media files
+      - backend_media:/app/media
+      - backend_static:/app/staticfiles
+    networks:
+      - essivi-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # HTTP Router
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`) || Host(`localhost`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.service=backend"
+      # Service
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      # WebSocket support
+      - "traefik.http.routers.backend-ws.rule=Host(`api.localhost`) && PathPrefix(`/ws`)"
+      - "traefik.http.routers.backend-ws.entrypoints=web"
+      - "traefik.http.routers.backend-ws.service=backend"
+      # Middlewares
+      - "traefik.http.middlewares.backend-headers.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
+      - "traefik.http.middlewares.backend-headers.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.backend-headers.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.routers.backend.middlewares=backend-headers"
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  essivi-network:
+    driver: bridge
+    name: essivi-network
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres_data:
+    name: essivi-postgres-data
+  redis_data:
+    name: essivi-redis-data
+  mongo_data:
+    name: essivi-mongo-data
+  backend_media:
+    name: essivi-backend-media
+  backend_static:
+    name: essivi-backend-static
