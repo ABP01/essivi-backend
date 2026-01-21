@@ -7,8 +7,6 @@ from django.contrib.auth import get_user_model
 from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
 
-User = get_user_model()
-
 class JWTAuthMiddleware:
     """
     Custom middleware that takes token from query string and authenticates user
@@ -33,6 +31,9 @@ class JWTAuthMiddleware:
     @database_sync_to_async
     def get_user(self, token):
         try:
+            # Get User model inside the method to avoid early loading
+            User = get_user_model()
+            
             # Decode the token
             UntypedToken(token)
             decoded_data = jwt_decode(token, settings.SECRET_KEY, algorithms=["HS256"])
@@ -42,6 +43,7 @@ class JWTAuthMiddleware:
             close_old_connections()
             
             return User.objects.get(id=user_id)
-        except (InvalidToken, TokenError, User.DoesNotExist):
+        except (InvalidToken, TokenError, Exception):
             from django.contrib.auth.models import AnonymousUser
             return AnonymousUser()
+
