@@ -19,9 +19,17 @@ django_asgi_app = get_asgi_application()
 
 # Now it's safe to import modules that depend on Django being initialized
 from channels.routing import ProtocolTypeRouter, URLRouter
+
+<<<<<<< HEAD
+=======
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+
+django_asgi_app = get_asgi_application()
+
 from core.middleware import JWTAuthMiddleware
 import apps.sales.routing
 
+>>>>>>> d13d163 (step1)
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": JWTAuthMiddleware(

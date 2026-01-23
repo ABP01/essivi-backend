@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Commande(models.Model):
     STATUS_CHOICES = (
@@ -20,6 +21,8 @@ class Commande(models.Model):
     def __str__(self):
         return f"Commande {self.id} - {self.client}"
 
+from core.utils.images import compress_image
+
 class Livraison(models.Model):
     tournee = models.ForeignKey('logistics.Tournee', on_delete=models.CASCADE)
     commande = models.OneToOneField(Commande, on_delete=models.CASCADE, null=True, blank=True)
@@ -38,12 +41,33 @@ class Livraison(models.Model):
         help_text="Statut de progression de la livraison"
     )
     
-    gps_lat = models.FloatField(null=True, blank=True)
-    gps_lng = models.FloatField(null=True, blank=True)
+    gps_lat = models.FloatField(
+        null=True, 
+        blank=True,
+        validators=[
+            MinValueValidator(-90.0),
+            MaxValueValidator(90.0)
+        ]
+    )
+    gps_lng = models.FloatField(
+        null=True, 
+        blank=True,
+        validators=[
+            MinValueValidator(-180.0),
+            MaxValueValidator(180.0)
+        ]
+    )
     photo_preuve = models.ImageField(upload_to='livraisons/', null=True, blank=True)
     signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
     preuve_validee = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.photo_preuve and not self.photo_preuve.name.endswith('.webp'):
+            self.photo_preuve = compress_image(self.photo_preuve)
+        if self.signature and not self.signature.name.endswith('.webp'):
+            self.signature = compress_image(self.signature)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Livraison {self.id} - {self.client}"

@@ -3,9 +3,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ
 from .serializers import CommandeSerializer, LivraisonSerializer, NotificationSerializer, BottleReturnSerializer, SubscriptionSerializer, FAQSerializer
+import logging
+
+logger = logging.getLogger('apps.sales')
 
 class CommandeViewSet(viewsets.ModelViewSet):
-    queryset = Commande.objects.all()  # Requis pour le router DRF
+    queryset = Commande.objects.select_related('agent', 'client').all()
     serializer_class = CommandeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -13,15 +16,21 @@ class CommandeViewSet(viewsets.ModelViewSet):
         user = self.request.user
         role = getattr(user, 'role', 'client')
         
+        # Optimize queries with select_related
+        base_queryset = Commande.objects.select_related('agent', 'client')
+        
         if user.is_superuser or role in ['admin', 'gestionnaire']:
-            return Commande.objects.all()
+            return base_queryset.all()
         elif role == 'agent':
-            return Commande.objects.filter(agent=user)
-        return Commande.objects.filter(client=user)
+            return base_queryset.filter(agent=user)
+        return base_queryset.filter(client=user)
+    
     
     @action(detail=True, methods=['post'])
     def assign(self, request, pk=None):
         """Assign an agent to a command and auto-create Livraison"""
+        from .services import SalesService
+        
         commande = self.get_object()
         agent_id = request.data.get('agent_id')
         
@@ -32,76 +41,23 @@ class CommandeViewSet(viewsets.ModelViewSet):
             )
         
         try:
-            from apps.users.models import CustomUser
-            from django.utils import timezone
-            from apps.logistics.models import Tournee
-            from datetime import date
-            agent = CustomUser.objects.get(id=agent_id, role='agent')
-            commande.agent = agent
-            commande.statut = 'validated'  # Update status when assigned
-            commande.save()
-            
-            # Auto-create a Tournee for today if it doesn't exist
-            today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-            today_end = timezone.now().replace(hour=23, minute=59, second=59, microsecond=999999)
-            
-            tournee, created = Tournee.objects.get_or_create(
-                agent=agent,
-                date_debut__gte=today_start,
-                date_debut__lte=today_end,
-                defaults={
-                    'date_debut': timezone.now(),
-                    'stock_initial': 0
-                }
-            )
-            
-            # Auto-create or update Livraison
-            livraison, created = Livraison.objects.get_or_create(
-                commande=commande,
-                defaults={
-                    'tournee': tournee,
-                    'client_id': commande.client_id,
-                }
-            )
-            
-            # If livraison already existed, update the tournee (in case of reassignment)
-            if not created:
-                livraison.tournee = tournee
-                livraison.save()
-
-
-            # Create database notification
-            Notification.objects.create(
-                user=agent,
-                title="Nouvelle commande",
-                message=f"La commande #{commande.id} vous a été assignée.",
-                type="info"
-            )
-
-            # Send real-time notification to the agent
-            from asgiref.sync import async_to_sync
-            from channels.layers import get_channel_layer
-            
-            channel_layer = get_channel_layer()
-            if channel_layer:
-                async_to_sync(channel_layer.group_send)(
-                    f"user_{agent.id}",
-                    {
-                        "type": "send_notification",
-                        "message": f"Nouvelle commande assignée : {commande.id}"
-                    }
-                )
-            
+            result = SalesService.assign_agent_to_command(commande.id, agent_id)
             serializer = self.get_serializer(commande)
             return Response(serializer.data)
-        except CustomUser.DoesNotExist:
+        except ValueError as e:
             return Response(
-                {'error': 'Agent not found'},
-                status=status.HTTP_404_NOT_FOUND
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+
 class LivraisonViewSet(viewsets.ModelViewSet):
-    queryset = Livraison.objects.all()  # Requis pour le router DRF
+    queryset = Livraison.objects.select_related('tournee__agent', 'commande', 'client').all()
     serializer_class = LivraisonSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -109,12 +65,15 @@ class LivraisonViewSet(viewsets.ModelViewSet):
         user = self.request.user
         role = getattr(user, 'role', 'client')
         
+        # Optimize with select_related for related objects
+        base_queryset = Livraison.objects.select_related('tournee__agent', 'commande', 'client')
+        
         if user.is_superuser or role in ['admin', 'gestionnaire']:
-            return Livraison.objects.all()
+            return base_queryset.all()
         elif role == 'agent':
             # Filtrer par le tricycle assigné à l'agent (logique Tournee)
-            return Livraison.objects.filter(tournee__agent=user)
-        return Livraison.objects.filter(client=user)
+            return base_queryset.filter(tournee__agent=user)
+        return base_queryset.filter(client=user)
     
     @action(detail=True, methods=['post'])
     def submit_proof(self, request, pk=None):
@@ -141,8 +100,9 @@ class LivraisonViewSet(viewsets.ModelViewSet):
         if 'photo_preuve' in request.FILES:
             livraison.photo_preuve = request.FILES['photo_preuve']
         
-        # Mark proof as validated
+        # Mark proof as validated and delivered
         livraison.preuve_validee = True
+        livraison.statut_livraison = 'delivered'
         livraison.save()
         
         # Update associated command status

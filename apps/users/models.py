@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class CustomUser(AbstractUser):
     ROLE_CHOICES = (
@@ -11,6 +12,8 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
     phone_number = models.CharField(max_length=20, blank=True, null=True)
 
+from core.utils.images import compress_image
+
 class AgentProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='agent_profile')
     photo = models.ImageField(upload_to='agents/', null=True, blank=True)
@@ -18,8 +21,29 @@ class AgentProfile(models.Model):
     tricycle = models.ForeignKey('logistics.Tricycle', on_delete=models.SET_NULL, null=True, blank=True)
     zone_assignee = models.CharField(max_length=100, blank=True)
 
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
+    def save(self, *args, **kwargs):
+        if self.photo and not self.photo.name.endswith('.webp'):
+            self.photo = compress_image(self.photo)
+        super().save(*args, **kwargs)
+
+    latitude = models.FloatField(
+        null=True, 
+        blank=True,
+        validators=[
+            MinValueValidator(-90.0, message="Latitude must be >= -90"),
+            MaxValueValidator(90.0, message="Latitude must be <= 90")
+        ],
+        help_text="Latitude entre -90 et 90"
+    )
+    longitude = models.FloatField(
+        null=True, 
+        blank=True,
+        validators=[
+            MinValueValidator(-180.0, message="Longitude must be >= -180"),
+            MaxValueValidator(180.0, message="Longitude must be <= 180")
+        ],
+        help_text="Longitude entre -180 et 180"
+    )
     identification_number = models.CharField(max_length=100, blank=True, null=True)
     tricycle_plate = models.CharField(max_length=50, blank=True, null=True)
     
@@ -38,9 +62,28 @@ class ClientProfile(models.Model):
     nom_proprietaire = models.CharField(max_length=100, blank=True, null=True)
     adresse = models.CharField(max_length=255, blank=True, null=True)
     # Using simple chars for GPS for now, can upgrade to GeoDjango PointField later if PostGIS is set up
-    gps_lat = models.FloatField(null=True, blank=True)
-    gps_lng = models.FloatField(null=True, blank=True)
-    solde = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    gps_lat = models.FloatField(
+        null=True, 
+        blank=True,
+        validators=[
+            MinValueValidator(-90.0),
+            MaxValueValidator(90.0)
+        ]
+    )
+    gps_lng = models.FloatField(
+        null=True, 
+        blank=True,
+        validators=[
+            MinValueValidator(-180.0),
+            MaxValueValidator(180.0)
+        ]
+    )
+    solde = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0,
+        validators=[MinValueValidator(0, message="Solde cannot be negative")]
+    )
     
     # Adresse formatée pour affichage
     formatted_address = models.CharField(max_length=500, blank=True, null=True)
