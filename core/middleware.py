@@ -5,10 +5,7 @@ from jwt import decode as jwt_decode
 from django.conf import settings
 from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
-<<<<<<< HEAD
-=======
-from apps.users.models import CustomUser
->>>>>>> d13d163 (step1)
+from django.contrib.auth import get_user_model
 
 class JWTAuthMiddleware:
     """
@@ -45,13 +42,7 @@ class JWTAuthMiddleware:
             # Close old database connections to prevent errors
             close_old_connections()
             
-<<<<<<< HEAD
             return User.objects.get(id=user_id)
         except (InvalidToken, TokenError, Exception):
-=======
-            return CustomUser.objects.get(id=user_id)
-        except (InvalidToken, TokenError, CustomUser.DoesNotExist):
->>>>>>> d13d163 (step1)
             from django.contrib.auth.models import AnonymousUser
             return AnonymousUser()
-
