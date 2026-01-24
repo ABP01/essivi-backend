@@ -1,0 +1,48 @@
+# Traefik Dynamic Configuration
+# Static routes for Essivi Backend services
+
+http:
+  routers:
+    # Backend API Router
+    backend:
+      rule: "Host(`api.localhost`) || Host(`localhost`)"
+      service: backend
+      entrypoints:
+        - web
+      middlewares:
+        - backend-headers
+
+    # Backend WebSocket Router
+    backend-ws:
+      rule: "Host(`api.localhost`) && PathPrefix(`/ws`)"
+      service: backend
+      entrypoints:
+        - web
+
+    # Traefik Dashboard
+    traefik-dashboard:
+      rule: "Host(`traefik.localhost`)"
+      service: api@internal
+      entrypoints:
+        - web
+
+  services:
+    # Backend Service
+    backend:
+      loadBalancer:
+        servers:
+          - url: "http://backend:8000"
+
+  middlewares:
+    # CORS Headers for Backend
+    backend-headers:
+      headers:
+        accessControlAllowMethods:
+          - "GET"
+          - "OPTIONS"
+          - "PUT"
+          - "POST"
+          - "DELETE"
+          - "PATCH"
+        accessControlAllowHeaders: "*"
+        accessControlAllowOriginList: "*"

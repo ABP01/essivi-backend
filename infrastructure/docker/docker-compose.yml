@@ -15,22 +15,21 @@ services:
       - "--api=true"
       - "--api.dashboard=true"
       - "--api.insecure=true"
-      # Docker provider
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=essivi-network"
+      # File provider for static configuration
+      - "--providers.file=true"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
       # Entrypoints
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       # Logging
       - "--log.level=INFO"
       - "--accesslog=true"
+    volumes:
+      - ../traefik/traefik.yml:/etc/traefik/dynamic.yml:ro
     ports:
       - "80:80"
       - "443:443"
       - "8080:8080" # Traefik Dashboard
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - essivi-network
     restart: unless-stopped
@@ -119,6 +118,10 @@ services:
       POSTGRES_PORT: 5432
       REDIS_HOST: redis
       MONGO_URI: mongodb://mongo:27017
+      DEBUG: 'False'
+      DJANGO_SETTINGS_MODULE: core.settings
+    ports:
+      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -133,23 +136,7 @@ services:
     networks:
       - essivi-network
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      # HTTP Router
-      - "traefik.http.routers.backend.rule=Host(`api.localhost`) || Host(`localhost`)"
-      - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.routers.backend.service=backend"
-      # Service
-      - "traefik.http.services.backend.loadbalancer.server.port=8000"
-      # WebSocket support
-      - "traefik.http.routers.backend-ws.rule=Host(`api.localhost`) && PathPrefix(`/ws`)"
-      - "traefik.http.routers.backend-ws.entrypoints=web"
-      - "traefik.http.routers.backend-ws.service=backend"
-      # Middlewares
-      - "traefik.http.middlewares.backend-headers.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
-      - "traefik.http.middlewares.backend-headers.headers.accesscontrolallowheaders=*"
-      - "traefik.http.middlewares.backend-headers.headers.accesscontrolalloworiginlist=*"
-      - "traefik.http.routers.backend.middlewares=backend-headers"
+    # Removed Traefik labels - using static configuration
 
 # =============================================================================
 # Networks
