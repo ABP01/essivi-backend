@@ -97,3 +97,6 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 317, in connect_check_health
     raise ConnectionError(self._error_message(e))
 redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+INFO 2026-01-24 22:43:00,574 autoreload 23260 20708 Watching for file changes with StatReloader
+INFO 2026-01-24 22:47:29,010 autoreload 23260 20708 C:\ProjetIAI\essivi-backend\apps\users\models.py changed, reloading.
+INFO 2026-01-24 22:47:35,130 autoreload 28904 25228 Watching for file changes with StatReloader

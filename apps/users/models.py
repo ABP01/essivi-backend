@@ -58,7 +58,7 @@ class AgentProfile(models.Model):
 
 class ClientProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='client_profile')
-    nom_point_vente = models.CharField(max_length=100)
+    nom_point_vente = models.CharField(max_length=100, blank=True, default="N/A")
     nom_proprietaire = models.CharField(max_length=100, blank=True, null=True)
     adresse = models.CharField(max_length=255, blank=True, null=True)
     # Using simple chars for GPS for now, can upgrade to GeoDjango PointField later if PostGIS is set up

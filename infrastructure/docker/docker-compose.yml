@@ -118,8 +118,9 @@ services:
       POSTGRES_PORT: 5432
       REDIS_HOST: redis
       MONGO_URI: mongodb://mongo:27017
-      DEBUG: 'False'
+      DEBUG: 'True'
       DJANGO_SETTINGS_MODULE: core.settings
+      ALLOWED_HOSTS: localhost,127.0.0.1,10.0.2.2,192.168.1.78
     ports:
       - "8000:8000"
     depends_on:
