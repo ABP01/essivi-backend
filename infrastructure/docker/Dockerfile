@@ -66,7 +66,7 @@ RUN printf '#!/bin/bash\n\
     echo "=========================================="\n\
     echo "  Starting Gunicorn WSGI Server..."\n\
     echo "=========================================="\n\
-    exec gunicorn --bind 0.0.0.0:$PORT app:application --workers 2 --threads 2\n\
+    exec gunicorn --bind 0.0.0.0:$PORT app:app --workers 2 --threads 2\n\
     ' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 # Create non-root user for security
