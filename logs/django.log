@@ -100,3 +100,4 @@ redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connec
 INFO 2026-01-24 22:43:00,574 autoreload 23260 20708 Watching for file changes with StatReloader
 INFO 2026-01-24 22:47:29,010 autoreload 23260 20708 C:\ProjetIAI\essivi-backend\apps\users\models.py changed, reloading.
 INFO 2026-01-24 22:47:35,130 autoreload 28904 25228 Watching for file changes with StatReloader
+INFO 2026-01-26 11:02:53,883 autoreload 24900 27632 Watching for file changes with StatReloader

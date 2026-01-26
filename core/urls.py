@@ -26,6 +26,9 @@ urlpatterns = [
     path('api/auth/', include('apps.users.urls_auth')), # We will create this file for cleaner separation
     path('', include('django_prometheus.urls')),
     
+    # Appwrite Authentication endpoints
+    path('api/auth/appwrite/', include('apps.users.urls_appwrite')),
+    
     # Old direct overrides if we don't want to create a new file, but creating a new file is cleaner. 
     # Let's try to just map them here for now to avoid creating files if possible, but apps.users.urls mixes everything.
     # Actually, let's keep it simple and just include the existing urls but strictly for the auth part? No, that pulls in the router.
