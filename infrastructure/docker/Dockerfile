@@ -56,20 +56,20 @@ WORKDIR /app
 # Copy application code
 COPY . .
 
-# Create entrypoint script
+# Create entrypoint script for Render
 RUN printf '#!/bin/bash\n\
     set -e\n\
     echo "=========================================="\n\
-    echo "  Essivi Backend - Starting..."\n\
+    echo "  Essivi Backend - Starting on Render..."\n\
     echo "=========================================="\n\
     echo "[1/2] Applying database migrations..."\n\
     python manage.py migrate --noinput\n\
     echo "[2/2] Collecting static files..."\n\
     python manage.py collectstatic --noinput\n\
     echo "=========================================="\n\
-    echo "  Starting Daphne ASGI Server..."\n\
+    echo "  Starting Daphne ASGI Server on port $PORT..."\n\
     echo "=========================================="\n\
-    exec daphne -b 0.0.0.0 -p 8000 --access-log - --proxy-headers core.asgi:application\n\
+    exec daphne -b 0.0.0.0 -p $PORT --access-log - --proxy-headers core.asgi:application\n\
     ' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 # Create non-root user for security
@@ -81,7 +81,7 @@ RUN addgroup --system --gid 1000 essivi && \
 
 USER essivi
 
-EXPOSE 8000
+EXPOSE $PORT
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
