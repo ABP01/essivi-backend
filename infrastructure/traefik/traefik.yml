@@ -3,23 +3,7 @@
 
 http:
   routers:
-    # Backend API Router
-    backend:
-      rule: "Host(`api.localhost`) || Host(`localhost`)"
-      service: backend
-      entrypoints:
-        - web
-      middlewares:
-        - backend-headers
-
-    # Backend WebSocket Router
-    backend-ws:
-      rule: "Host(`api.localhost`) && PathPrefix(`/ws`)"
-      service: backend
-      entrypoints:
-        - web
-
-    # Traefik Dashboard
+    # Traefik Dashboard (static config kept for consistency)
     traefik-dashboard:
       rule: "Host(`traefik.localhost`)"
       service: api@internal
@@ -27,22 +11,7 @@ http:
         - web
 
   services:
-    # Backend Service
-    backend:
-      loadBalancer:
-        servers:
-          - url: "http://backend:8000"
+    # No static services needed - backend is now configured via Docker labels
 
   middlewares:
-    # CORS Headers for Backend
-    backend-headers:
-      headers:
-        accessControlAllowMethods:
-          - "GET"
-          - "OPTIONS"
-          - "PUT"
-          - "POST"
-          - "DELETE"
-          - "PATCH"
-        accessControlAllowHeaders: "*"
-        accessControlAllowOriginList: "*"
+    # Removed backend-headers - now defined via Docker labels for the backend service

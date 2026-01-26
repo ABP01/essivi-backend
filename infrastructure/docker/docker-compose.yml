@@ -1,6 +1,6 @@
 # =============================================================================
 # Docker Compose - Essivi Backend Infrastructure
-# Services: Traefik, PostgreSQL, MongoDB, Redis, Django Backend
+# Services: Traefik, Django Backend (using remote databases and services)
 # =============================================================================
 
 services:
@@ -8,7 +8,7 @@ services:
   # Traefik - Reverse Proxy & Load Balancer
   # -------------------------------------------------------------------------
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.1
     container_name: essivi-traefik
     command:
       # API & Dashboard
@@ -41,69 +41,7 @@ services:
       - "traefik.http.routers.traefik-dashboard.service=api@internal"
 
   # -------------------------------------------------------------------------
-  # PostgreSQL - Primary Database
-  # -------------------------------------------------------------------------
-  db:
-    image: postgres:15-alpine
-    container_name: essivi-postgres
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-essivi}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-essivi}" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - essivi-network
-    restart: unless-stopped
-
-  # -------------------------------------------------------------------------
-  # Redis - Cache & Django Channels
-  # -------------------------------------------------------------------------
-  redis:
-    image: redis:7-alpine
-    container_name: essivi-redis
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
-    networks:
-      - essivi-network
-    restart: unless-stopped
-
-  # -------------------------------------------------------------------------
-  # MongoDB - Analytics Database
-  # -------------------------------------------------------------------------
-  mongo:
-    image: mongo:6
-    container_name: essivi-mongo
-    environment:
-      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-essivi_analytics}
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - essivi-network
-    restart: unless-stopped
-
-  # -------------------------------------------------------------------------
-  # Django Backend - ASGI Application
+  # Django Backend - ASGI Application (using remote databases and services)
   # -------------------------------------------------------------------------
   backend:
     build:
@@ -113,31 +51,39 @@ services:
     env_file:
       - .env
     environment:
-      # Override hosts to use Docker service names
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-      REDIS_HOST: redis
-      MONGO_URI: mongodb://mongo:27017
+      # Use remote services from .env file (no overrides needed for local containers)
       DEBUG: 'True'
       DJANGO_SETTINGS_MODULE: core.settings
-      ALLOWED_HOSTS: localhost,127.0.0.1,10.0.2.2,192.168.1.78
+      ALLOWED_HOSTS: localhost,127.0.0.1,10.0.2.2,192.168.1.78,api.localhost
     ports:
       - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
     volumes:
-      # Persistent storage for media files
+      # Persistent storage for media files (if needed locally, but using remote DBs now)
       - backend_media:/app/media
       - backend_static:/app/staticfiles
     networks:
       - essivi-network
     restart: unless-stopped
-    # Removed Traefik labels - using static configuration
+    labels:
+      - "traefik.enable=true"
+      # API routing (HTTP and WebSocket support via ASGI/Django Channels)
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`) || Host(`localhost`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.service=backend@docker"
+      - "traefik.http.routers.backend.middlewares=backend-headers@docker"
+      # WebSocket routing for real-time features (GPS tracking, etc.)
+      - "traefik.http.routers.backend-ws.rule=Host(`api.localhost`) && PathPrefix(`/ws`)"
+      - "traefik.http.routers.backend-ws.entrypoints=web"
+      - "traefik.http.routers.backend-ws.service=backend@docker"
+      # Service definition with load balancing and health checks
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.path=/api/health/"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.timeout=5s"
+      # CORS middleware for API
+      - "traefik.http.middlewares.backend-headers.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
+      - "traefik.http.middlewares.backend-headers.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.backend-headers.headers.accesscontrolalloworiginlist=*"
 
 # =============================================================================
 # Networks
@@ -151,12 +97,6 @@ networks:
 # Volumes
 # =============================================================================
 volumes:
-  postgres_data:
-    name: essivi-postgres-data
-  redis_data:
-    name: essivi-redis-data
-  mongo_data:
-    name: essivi-mongo-data
   backend_media:
     name: essivi-backend-media
   backend_static:

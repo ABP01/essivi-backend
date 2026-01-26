@@ -62,21 +62,9 @@ RUN printf '#!/bin/bash\n\
     echo "=========================================="\n\
     echo "  Essivi Backend - Starting..."\n\
     echo "=========================================="\n\
-    echo "[1/4] Waiting for PostgreSQL..."\n\
-    while ! nc -z ${POSTGRES_HOST:-db} ${POSTGRES_PORT:-5432}; do\n\
-    echo "  PostgreSQL is unavailable - sleeping..."\n\
-    sleep 2\n\
-    done\n\
-    echo "  PostgreSQL is up!"\n\
-    echo "[2/4] Waiting for Redis..."\n\
-    while ! nc -z ${REDIS_HOST:-redis} 6379; do\n\
-    echo "  Redis is unavailable - sleeping..."\n\
-    sleep 2\n\
-    done\n\
-    echo "  Redis is up!"\n\
-    echo "[3/4] Applying database migrations..."\n\
+    echo "[1/2] Applying database migrations..."\n\
     python manage.py migrate --noinput\n\
-    echo "[4/4] Collecting static files..."\n\
+    echo "[2/2] Collecting static files..."\n\
     python manage.py collectstatic --noinput\n\
     echo "=========================================="\n\
     echo "  Starting Daphne ASGI Server..."\n\
