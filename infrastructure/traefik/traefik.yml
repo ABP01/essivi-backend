@@ -1,0 +1,17 @@
+# Traefik Dynamic Configuration
+# Static routes for Essivi Backend services
+
+http:
+  routers:
+    # Traefik Dashboard (static config kept for consistency)
+    traefik-dashboard:
+      rule: "Host(`traefik.localhost`)"
+      service: api@internal
+      entrypoints:
+        - web
+
+  services:
+    # No static services needed - backend is now configured via Docker labels
+
+  middlewares:
+    # Removed backend-headers - now defined via Docker labels for the backend service

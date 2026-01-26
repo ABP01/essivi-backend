@@ -11,7 +11,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
     
     class Meta:
         model = CustomUser

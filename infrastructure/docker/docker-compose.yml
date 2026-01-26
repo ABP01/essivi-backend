@@ -1,0 +1,103 @@
+# =============================================================================
+# Docker Compose - Essivi Backend Infrastructure
+# Services: Traefik, Django Backend (using remote databases and services)
+# =============================================================================
+
+services:
+  # -------------------------------------------------------------------------
+  # Traefik - Reverse Proxy & Load Balancer
+  # -------------------------------------------------------------------------
+  traefik:
+    image: traefik:v3.1
+    container_name: essivi-traefik
+    command:
+      # API & Dashboard
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      # File provider for static configuration
+      - "--providers.file=true"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Logging
+      - "--log.level=INFO"
+      - "--accesslog=true"
+    volumes:
+      - ../traefik/traefik.yml:/etc/traefik/dynamic.yml:ro
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Traefik Dashboard
+    networks:
+      - essivi-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Dashboard routing
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=web"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+
+  # -------------------------------------------------------------------------
+  # Django Backend - ASGI Application (using remote databases and services)
+  # -------------------------------------------------------------------------
+  backend:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile
+    container_name: essivi-backend
+    env_file:
+      - .env
+    environment:
+      # Use remote services from .env file (no overrides needed for local containers)
+      DEBUG: 'True'
+      DJANGO_SETTINGS_MODULE: core.settings
+      ALLOWED_HOSTS: localhost,127.0.0.1,10.0.2.2,192.168.1.78,api.localhost
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persistent storage for media files (if needed locally, but using remote DBs now)
+      - backend_media:/app/media
+      - backend_static:/app/staticfiles
+    networks:
+      - essivi-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # API routing (HTTP and WebSocket support via ASGI/Django Channels)
+      - "traefik.http.routers.backend.rule=Host(`api.localhost`) || Host(`localhost`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.service=backend@docker"
+      - "traefik.http.routers.backend.middlewares=backend-headers@docker"
+      # WebSocket routing for real-time features (GPS tracking, etc.)
+      - "traefik.http.routers.backend-ws.rule=Host(`api.localhost`) && PathPrefix(`/ws`)"
+      - "traefik.http.routers.backend-ws.entrypoints=web"
+      - "traefik.http.routers.backend-ws.service=backend@docker"
+      # Service definition with load balancing and health checks
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.path=/api/health/"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.timeout=5s"
+      # CORS middleware for API
+      - "traefik.http.middlewares.backend-headers.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
+      - "traefik.http.middlewares.backend-headers.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.backend-headers.headers.accesscontrolalloworiginlist=*"
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  essivi-network:
+    driver: bridge
+    name: essivi-network
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  backend_media:
+    name: essivi-backend-media
+  backend_static:
+    name: essivi-backend-static

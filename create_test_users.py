@@ -12,10 +12,9 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
-from django.contrib.auth import get_user_model
-from apps.users.models import AgentProfile, ClientProfile
+from apps.users.models import CustomUser, AgentProfile, ClientProfile
 
-User = get_user_model()
+User = CustomUser
 
 def create_test_users():
     """Crée les utilisateurs de test s'ils n'existent pas déjà"""

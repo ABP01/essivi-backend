@@ -2,7 +2,12 @@ from rest_framework import viewsets, permissions, generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser, AgentProfile, ClientProfile
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils.crypto import get_random_string
+from django.utils import timezone
+from datetime import timedelta
+from .models import CustomUser, AgentProfile, ClientProfile, PasswordResetToken
 from .serializers import CustomUserSerializer, AgentProfileSerializer, ClientProfileSerializer, RegisterSerializer
 
 class RegisterView(generics.CreateAPIView):
@@ -103,6 +108,88 @@ class ChangePasswordView(APIView):
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PasswordResetRequestView(APIView):
+    """API endpoint for requesting password reset"""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            # Don't reveal if email exists or not for security
+            return Response({'message': 'If the email exists, a reset link has been sent.'}, status=status.HTTP_200_OK)
+
+        # Generate token
+        token = get_random_string(64)
+        reset_token = PasswordResetToken.objects.create(user=user, token=token)
+
+        # Send email
+        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+        subject = 'Réinitialisation de votre mot de passe Essivi'
+        message = f"""
+        Bonjour {user.first_name or user.username},
+
+        Vous avez demandé la réinitialisation de votre mot de passe pour l'application Essivi.
+
+        Cliquez sur le lien suivant pour réinitialiser votre mot de passe :
+        {reset_url}
+
+        Ce lien expirera dans 24 heures.
+
+        Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.
+
+        Cordialement,
+        L'équipe Essivi
+        """
+
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Log error but don't fail the request
+            print(f"Failed to send reset email: {e}")
+
+        return Response({'message': 'If the email exists, a reset link has been sent.'}, status=status.HTTP_200_OK)
+
+class PasswordResetConfirmView(APIView):
+    """API endpoint for confirming password reset with token"""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        token = request.data.get('token')
+        new_password = request.data.get('new_password')
+
+        if not token or not new_password:
+            return Response({'error': 'Token and new password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            reset_token = PasswordResetToken.objects.get(token=token, used=False)
+        except PasswordResetToken.DoesNotExist:
+            return Response({'error': 'Invalid or expired token'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if reset_token.is_expired():
+            return Response({'error': 'Token has expired'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update password
+        user = reset_token.user
+        user.set_password(new_password)
+        user.save()
+
+        # Mark token as used
+        reset_token.used = True
+        reset_token.save()
+
+        return Response({'message': 'Password reset successfully'}, status=status.HTTP_200_OK)
 
 class UserPreferencesView(APIView):
     """API endpoint for getting and updating user preferences"""

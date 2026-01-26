@@ -1,0 +1,103 @@
+INFO 2026-01-21 13:46:28,559 autoreload 52 139881740409728 Watching for file changes with StatReloader
+INFO 2026-01-21 14:21:33,073 autoreload 52 139881740409728 /app/apps/users/models.py changed, reloading.
+INFO 2026-01-21 14:21:33,932 autoreload 54 139908188453760 Watching for file changes with StatReloader
+INFO 2026-01-21 14:22:05,911 autoreload 54 139908188453760 /app/apps/sales/models.py changed, reloading.
+INFO 2026-01-21 14:22:06,837 autoreload 56 140004587223936 Watching for file changes with StatReloader
+ERROR 2026-01-23 11:42:57,325 services 10 140372466456256 WebSocket notification failed: Error 111 connecting to localhost:6379. Connection refused.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 307, in connect_check_health
+    await self.retry.call_with_retry(
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/retry.py", line 50, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 768, in _connect
+    reader, writer = await asyncio.open_connection(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/asyncio/streams.py", line 48, in open_connection
+    transport, _ = await loop.create_connection(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 2043, in create_connection
+  File "uvloop/loop.pyx", line 2020, in uvloop.loop.Loop.create_connection
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/apps/sales/services.py", line 92, in assign_agent_to_command
+    async_to_sync(channel_layer.group_send)(
+  File "/usr/local/lib/python3.11/site-packages/asgiref/sync.py", line 325, in __call__
+    return call_result.result()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/local/lib/python3.11/site-packages/asgiref/sync.py", line 365, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/channels_redis/core.py", line 516, in group_send
+    await connection.zremrangebyscore(
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 317, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+ERROR 2026-01-23 16:03:55,361 services 1294 140372473800384 WebSocket notification failed: Error 111 connecting to localhost:6379. Connection refused.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 307, in connect_check_health
+    await self.retry.call_with_retry(
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/retry.py", line 50, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 768, in _connect
+    reader, writer = await asyncio.open_connection(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/asyncio/streams.py", line 48, in open_connection
+    transport, _ = await loop.create_connection(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 2043, in create_connection
+  File "uvloop/loop.pyx", line 2020, in uvloop.loop.Loop.create_connection
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/apps/sales/services.py", line 92, in assign_agent_to_command
+    async_to_sync(channel_layer.group_send)(
+  File "/usr/local/lib/python3.11/site-packages/asgiref/sync.py", line 325, in __call__
+    return call_result.result()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/local/lib/python3.11/site-packages/asgiref/sync.py", line 365, in main_wrap
+    result = await awaitable
+             ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/channels_redis/core.py", line 516, in group_send
+    await connection.zremrangebyscore(
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/client.py", line 720, in execute_command
+    conn = self.connection or await pool.get_connection()
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 1198, in get_connection
+    await self.ensure_connection(connection)
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 1231, in ensure_connection
+    await connection.connect()
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 298, in connect
+    await self.connect_check_health(check_health=True)
+  File "/usr/local/lib/python3.11/site-packages/redis/asyncio/connection.py", line 317, in connect_check_health
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.
+INFO 2026-01-24 22:43:00,574 autoreload 23260 20708 Watching for file changes with StatReloader
+INFO 2026-01-24 22:47:29,010 autoreload 23260 20708 C:\ProjetIAI\essivi-backend\apps\users\models.py changed, reloading.
+INFO 2026-01-24 22:47:35,130 autoreload 28904 25228 Watching for file changes with StatReloader
+INFO 2026-01-26 11:02:53,883 autoreload 24900 27632 Watching for file changes with StatReloader
