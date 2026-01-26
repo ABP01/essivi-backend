@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 from datetime import timedelta
 from dotenv import load_dotenv
 
@@ -54,7 +55,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Always specify exact origins, never use CORS_ALLOW_ALL_ORIGINS in production
 CORS_ALLOWED_ORIGINS = os.getenv(
     'CORS_ALLOWED_ORIGINS', 
-    'http://localhost:3000,http://localhost:3001,http://localhost'
+    'http://localhost:3000,http://localhost:3001,http://localhost,https://essivivi.vercel.app'
 ).split(',')
 
 # Additional CORS settings for stricter security
@@ -71,6 +72,8 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+# Frontend URL for emails (Password Reset)
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
 # Application definition
 
@@ -131,6 +134,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 ASGI_APPLICATION = 'core.asgi.application'
 
+# CSRF Configuration
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    'https://essivi-backend.onrender.com'
+).split(',')
+
 # Channels Configuration
 # Use in-memory channel layer in development, Redis in production
 if DEBUG:
@@ -142,11 +151,24 @@ if DEBUG:
     }
 else:
     # Redis for production
+    redis_host = os.getenv('REDIS_HOST', 'localhost')
+    redis_port = os.getenv('REDIS_PORT', '6379')
+    redis_user = os.getenv('REDIS_USERNAME', '')
+    redis_pass = os.getenv('REDIS_PASSWORD', '')
+    
+    # Construct the Redis URL
+    # format: redis://[[username]:[password]@]host[:port][/db]
+    auth_str = ""
+    if redis_user or redis_pass:
+        auth_str = f"{redis_user}:{redis_pass}@"
+    
+    redis_url = f"redis://{auth_str}{redis_host}:{redis_port}/0"
+
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
             'CONFIG': {
-                "hosts": [(os.getenv('REDIS_HOST', 'localhost'), 6379)],
+                "hosts": [redis_url],
             },
         },
     }
@@ -166,6 +188,13 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
+
+# Test Database Configuration
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
 
 
 # Password validation
@@ -215,7 +244,6 @@ MONGO_DB_NAME = os.getenv('MONGO_DB_NAME', 'essivi_analytics')
 # REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'core.authentication.AppwriteAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',

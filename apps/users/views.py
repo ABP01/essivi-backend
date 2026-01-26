@@ -15,6 +15,24 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = RegisterSerializer
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        # Generate JWT tokens
+        from rest_framework_simplejwt.tokens import RefreshToken
+        refresh = RefreshToken.for_user(user)
+
+        response_data = {
+            'user': CustomUserSerializer(user).data,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+
 from drf_spectacular.utils import extend_schema
 
 class LogoutView(APIView):
@@ -84,6 +102,13 @@ class MeView(APIView):
     def get(self, request):
         serializer = CustomUserSerializer(request.user)
         return Response(serializer.data)
+
+    def patch(self, request):
+        serializer = CustomUserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ChangePasswordView(APIView):
     """API endpoint for changing user password"""
@@ -216,4 +241,35 @@ class UserPreferencesView(APIView):
             return Response(serializer.data)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AppwriteLoginView(APIView):
+    """
+    Exchanges an Appwrite JWT for a Django SimpleJWT pair.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        jwt_token = request.data.get('jwt')
+        if not jwt_token:
+            return Response({'error': 'JWT is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from core.authentication import AppwriteAuthentication
+        auth = AppwriteAuthentication()
+        try:
+            user, _ = auth.authenticate_credentials(jwt_token)
+        except Exception as e:
+            return Response({'error': f'Authentication failed: {str(e)}'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        if not user:
+             return Response({'error': 'User not found or created'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Generate SimpleJWT tokens
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': CustomUserSerializer(user).data
+        })
 

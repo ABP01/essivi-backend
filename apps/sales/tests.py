@@ -42,7 +42,8 @@ class SalesServiceTestCase(TestCase):
         self.commande = Commande.objects.create(
             client=self.client_user,
             statut='pending',
-            details='Test order'
+            montant=100.00,
+            date_souhaitee=timezone.now()
         )
     
     def test_assign_agent_to_command_success(self):
@@ -104,3 +105,35 @@ class SalesServiceTestCase(TestCase):
 
 # To run these tests:
 # python manage.py test apps.sales.tests.test_services
+
+from rest_framework.test import APITestCase
+from rest_framework import status
+from django.urls import reverse
+
+class SalesAPITests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='apiuser',
+            email='api@test.com',
+            password='testpass123',
+            role='agent'
+        )
+        self.client.force_authenticate(user=self.user)
+        self.commandes_url = reverse('commande-list')
+
+    def test_get_commandes(self):
+        response = self.client.get(self.commandes_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data['results'], list)
+
+    def test_create_commande(self):
+        from django.utils import timezone
+        data = {
+            'client': self.user.id,
+            'statut': 'pending',
+            'montant': 150.00,
+            'date_souhaitee': timezone.now().isoformat()
+        }
+        response = self.client.post(self.commandes_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(float(response.data['montant']), 150.00)

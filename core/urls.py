@@ -35,10 +35,10 @@ urlpatterns = [
     # Best approach: Add the specific paths here.
     
     # Authentication
-    path('api/auth/login/', TokenObtainPairView.as_view(), name='auth_login'),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), # Keep for compatibility
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='auth_token_refresh'),
+    # path('api/auth/login/', TokenObtainPairView.as_view(), name='auth_login'), # Handled by apps.users.urls_auth
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), # Keep for legacy compatibility
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # Used by Mobile App (api_config.dart)
+    # path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='auth_token_refresh'), # Handled by apps.users.urls_auth
 
     # App URLs
     path('api/users/', include('apps.users.urls')),
