@@ -39,6 +39,13 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
+# Debug helper: print ALLOWED_HOSTS at startup so Render logs show the value
+# (temporary; useful to verify Render's env var is applied). Remove after debug.
+try:
+    print('ALLOWED_HOSTS_DEBUG:', ALLOWED_HOSTS)
+except Exception:
+    pass
+
 # Traefik Proxy Configuration
 USE_X_FORWARDED_HOST = os.getenv('USE_X_FORWARDED_HOST', 'False') == 'True'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
