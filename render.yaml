@@ -3,7 +3,7 @@ services:
     name: essivi-backend
     runtime: docker
     dockerfilePath: ./infrastructure/docker/Dockerfile
-    envVars:
+    healthCheckPath: /health/
       - key: DEBUG
         value: false
       - key: DJANGO_SETTINGS_MODULE

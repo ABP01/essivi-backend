@@ -53,10 +53,7 @@ COPY --from=builder /opt/venv /opt/venv
 
 WORKDIR /app
 
-# Copy application code
-COPY . .
-
-# Create entrypoint script for Render
+# Create entrypoint script for Render (WSGI with Gunicorn)
 RUN printf '#!/bin/bash\n\
     set -e\n\
     echo "=========================================="\n\
@@ -67,9 +64,9 @@ RUN printf '#!/bin/bash\n\
     echo "[2/2] Collecting static files..."\n\
     python manage.py collectstatic --noinput\n\
     echo "=========================================="\n\
-    echo "  Starting Daphne ASGI Server on port $PORT..."\n\
+    echo "  Starting Gunicorn WSGI Server..."\n\
     echo "=========================================="\n\
-    exec daphne -b 0.0.0.0 -p $PORT --access-log - --proxy-headers core.asgi:application\n\
+    exec gunicorn --bind 0.0.0.0:$PORT app:application --workers 2 --threads 2\n\
     ' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 # Create non-root user for security
