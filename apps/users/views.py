@@ -8,7 +8,7 @@ from django.utils.crypto import get_random_string
 from django.utils import timezone
 from datetime import timedelta
 from .models import CustomUser, AgentProfile, ClientProfile, PasswordResetToken
-from .serializers import CustomUserSerializer, AgentProfileSerializer, ClientProfileSerializer, RegisterSerializer, UserPreferencesSerializer
+from .serializers import CustomUserSerializer, AgentProfileSerializer, ClientProfileSerializer, RegisterSerializer, UserPreferencesSerializer, MeSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -100,12 +100,12 @@ class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
-        request=CustomUserSerializer,
-        responses={200: CustomUserSerializer},
+        request=MeSerializer,
+        responses={200: MeSerializer},
         description="Get current user profile"
     )
     def get(self, request):
-        serializer = CustomUserSerializer(request.user)
+        serializer = MeSerializer(request.user)
         return Response(serializer.data)
 
     @extend_schema(

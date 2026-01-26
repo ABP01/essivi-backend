@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema_field
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role', 'phone_number', 'is_active']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'role', 'phone_number', 'photo', 'is_active']
         read_only_fields = ['id']
 
 from django.contrib.auth.password_validation import validate_password
@@ -97,7 +97,7 @@ class AgentProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = AgentProfile
-        fields = ['id', 'user', 'firstname', 'lastname', 'status', 'identification_number', 'tricycle_plate', 'latitude', 'longitude', 'date_embauche', 'tricycle', 'zone_assignee']
+        fields = ['id', 'user', 'firstname', 'lastname', 'photo', 'status', 'identification_number', 'tricycle_plate', 'latitude', 'longitude', 'date_embauche', 'tricycle', 'zone_assignee']
 
     @extend_schema_field(serializers.CharField())
     def get_firstname(self, obj):
@@ -239,3 +239,24 @@ class UserPreferencesSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
+
+class MeSerializer(CustomUserSerializer):
+    profile = serializers.SerializerMethodField()
+    preferences = UserPreferencesSerializer(read_only=True)
+
+    class Meta(CustomUserSerializer.Meta):
+        fields = CustomUserSerializer.Meta.fields + ['profile', 'preferences']
+
+    def get_profile(self, obj):
+        try:
+            if hasattr(obj, 'role'):
+                if obj.role == 'agent':
+                    # Only return profile if it exists
+                    if hasattr(obj, 'agent_profile'):
+                        return AgentProfileSerializer(obj.agent_profile).data
+                elif obj.role == 'client':
+                    if hasattr(obj, 'client_profile'):
+                        return ClientProfileSerializer(obj.client_profile).data
+        except Exception:
+            pass
+        return None

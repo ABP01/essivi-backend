@@ -11,6 +11,12 @@ class CustomUser(AbstractUser):
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
     phone_number = models.CharField(max_length=20, blank=True, null=True)
+    photo = models.ImageField(upload_to='users/', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.photo and not self.photo.name.endswith('.webp'):
+            self.photo = compress_image(self.photo)
+        super().save(*args, **kwargs)
 
 from core.utils.images import compress_image
 
