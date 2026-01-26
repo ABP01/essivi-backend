@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import CustomUser, AgentProfile, ClientProfile, UserPreferences
+from drf_spectacular.utils import extend_schema_field
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -98,18 +99,21 @@ class AgentProfileSerializer(serializers.ModelSerializer):
         model = AgentProfile
         fields = ['id', 'user', 'firstname', 'lastname', 'status', 'identification_number', 'tricycle_plate', 'latitude', 'longitude', 'date_embauche', 'tricycle', 'zone_assignee']
 
+    @extend_schema_field(serializers.CharField())
     def get_firstname(self, obj):
         try:
             return obj.user.first_name
         except Exception:
             return ''
 
+    @extend_schema_field(serializers.CharField())
     def get_lastname(self, obj):
         try:
             return obj.user.last_name
         except Exception:
             return ''
 
+    @extend_schema_field(serializers.CharField())
     def get_status(self, obj):
         try:
             # prefer explicit agent status if present on profile, otherwise map user's active flag
@@ -190,18 +194,23 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         model = ClientProfile
         fields = ['id', 'user', 'nom_point_vente', 'storeName', 'nom_proprietaire', 'ownerName', 'adresse', 'address', 'gps_lat', 'gps_lng', 'lat', 'lng', 'solde']
 
+    @extend_schema_field(serializers.CharField())
     def get_storeName(self, obj):
         return obj.nom_point_vente or ''
 
+    @extend_schema_field(serializers.CharField())
     def get_ownerName(self, obj):
         return obj.nom_proprietaire or (obj.user.first_name + ' ' + obj.user.last_name).strip() or ''
 
+    @extend_schema_field(serializers.CharField())
     def get_address(self, obj):
         return obj.adresse or ''
 
+    @extend_schema_field(serializers.FloatField())
     def get_lat(self, obj):
         return obj.gps_lat if obj.gps_lat is not None else None
 
+    @extend_schema_field(serializers.FloatField())
     def get_lng(self, obj):
         return obj.gps_lng if obj.gps_lng is not None else None
 

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ
+from drf_spectacular.utils import extend_schema_field
 
 class CommandeSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='client.username', read_only=True)
@@ -20,18 +21,21 @@ class LivraisonSerializer(serializers.ModelSerializer):
     amount = serializers.SerializerMethodField()
     address = serializers.SerializerMethodField()
     
+    @extend_schema_field(serializers.CharField())
     def get_client_name(self, obj):
         # Try to get from linked commande first, fallback to user
         if obj.commande and obj.commande.client:
             return obj.commande.client.username
         return obj.client.username if obj.client else None
     
+    @extend_schema_field(serializers.CharField())
     def get_agent_phone(self, obj):
         # Get agent phone from tournee
         if obj.tournee and obj.tournee.agent:
             return obj.tournee.agent.phone_number
         return None
     
+    @extend_schema_field(serializers.CharField())
     def get_agent_name(self, obj):
         # Get agent name from tournee
         if obj.tournee and obj.tournee.agent:
@@ -41,12 +45,14 @@ class LivraisonSerializer(serializers.ModelSerializer):
             return obj.commande.agent.username
         return None
     
+    @extend_schema_field(serializers.FloatField())
     def get_amount(self, obj):
         # Get amount from linked commande
         if obj.commande:
             return float(obj.commande.montant)
         return 0.0
     
+    @extend_schema_field(serializers.CharField())
     def get_address(self, obj):
         # Try to get from client profile or commande
         if obj.client and hasattr(obj.client, 'client_profile'):

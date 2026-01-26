@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from django.conf import settings
 import firebase_admin
 from firebase_admin import credentials, messaging
+from drf_spectacular.utils import extend_schema
 
 # Initialiser le client Appwrite
 def get_appwrite_client():
@@ -33,6 +34,11 @@ def initialize_firebase():
         firebase_admin.initialize_app(cred)
 
 
+@extend_schema(
+    request=None,
+    responses={200: {'type': 'object', 'properties': {'message': {'type': 'string'}}}},
+    description="Send phone OTP"
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def send_phone_otp(request):
@@ -73,6 +79,11 @@ def send_phone_otp(request):
         )
 
 
+@extend_schema(
+    request=None,
+    responses={200: {'type': 'object', 'properties': {'message': {'type': 'string'}}}},
+    description="Verify phone OTP"
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_phone_otp(request):
@@ -114,6 +125,10 @@ def verify_phone_otp(request):
         )
 
 
+@extend_schema(
+    responses={200: {'type': 'object'}},
+    description="Get Appwrite user info"
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_appwrite_user(request):
@@ -154,6 +169,11 @@ def get_appwrite_user(request):
         )
 
 
+@extend_schema(
+    request=None,
+    responses={200: {'type': 'object', 'properties': {'message': {'type': 'string'}}}},
+    description="Save FCM token"
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def save_fcm_token(request):
@@ -198,6 +218,11 @@ def save_fcm_token(request):
         )
 
 
+@extend_schema(
+    request=None,
+    responses={200: {'type': 'object', 'properties': {'message': {'type': 'string'}}}},
+    description="Send push notification"
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def send_push_notification(request):
@@ -252,6 +277,10 @@ def send_push_notification(request):
         )
 
 
+@extend_schema(
+    responses={200: {'type': 'object', 'properties': {'status': {'type': 'string'}}}},
+    description="Appwrite health check"
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):

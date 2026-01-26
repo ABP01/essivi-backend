@@ -8,7 +8,9 @@ from .serializers import (TricycleSerializer, TourneeSerializer,
                           LocationHistorySerializer, AgentLocationSerializer,
                           AgentPositionSerializer)
 from apps.users.models import AgentProfile
+from apps.sales.models import Livraison
 from .utils import find_nearest_agents
+from drf_spectacular.utils import extend_schema
 
 class TricycleViewSet(viewsets.ModelViewSet):
     queryset = Tricycle.objects.all()
@@ -26,7 +28,12 @@ class AgentLocationView(APIView):
     POST /api/logistics/agents/{agent_id}/update_location/
     """
     permission_classes = [permissions.IsAuthenticated]
-    
+
+    @extend_schema(
+        request=AgentLocationSerializer,
+        responses={200: {'type': 'object', 'properties': {'message': {'type': 'string'}}}},
+        description="Update agent location"
+    )
     def post(self, request, agent_id):
         try:
             agent_profile = AgentProfile.objects.get(id=agent_id)
@@ -77,7 +84,11 @@ class AgentLocationsView(APIView):
     GET /api/logistics/agents/locations/
     """
     permission_classes = [permissions.IsAuthenticated]
-    
+
+    @extend_schema(
+        responses={200: AgentPositionSerializer(many=True)},
+        description="Get all agent locations"
+    )
     def get(self, request):
         # Filtrer les agents en ligne avec position
         agents = AgentProfile.objects.filter(
@@ -96,7 +107,12 @@ class NearestAgentsView(APIView):
     Body: {"latitude": 6.1319, "longitude": 1.2223, "max_agents": 5}
     """
     permission_classes = [permissions.IsAuthenticated]
-    
+
+    @extend_schema(
+        request=None,
+        responses={200: {'type': 'array', 'items': {'type': 'object'}}},
+        description="Find nearest agents"
+    )
     def post(self, request):
         latitude = request.data.get('latitude')
         longitude = request.data.get('longitude')
@@ -136,7 +152,11 @@ class TestAgentLocationView(APIView):
     Returns count of online agents and their basic info
     """
     permission_classes = [permissions.IsAuthenticated]
-    
+
+    @extend_schema(
+        responses={200: {'type': 'object'}},
+        description="Test agent location tracking"
+    )
     def get(self, request):
         # Stats générales
         total_agents = AgentProfile.objects.count()

@@ -8,7 +8,7 @@ from django.utils.crypto import get_random_string
 from django.utils import timezone
 from datetime import timedelta
 from .models import CustomUser, AgentProfile, ClientProfile, PasswordResetToken
-from .serializers import CustomUserSerializer, AgentProfileSerializer, ClientProfileSerializer, RegisterSerializer
+from .serializers import CustomUserSerializer, AgentProfileSerializer, ClientProfileSerializer, RegisterSerializer, UserPreferencesSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -99,10 +99,20 @@ class ClientProfileViewSet(viewsets.ModelViewSet):
 class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        request=CustomUserSerializer,
+        responses={200: CustomUserSerializer},
+        description="Get current user profile"
+    )
     def get(self, request):
         serializer = CustomUserSerializer(request.user)
         return Response(serializer.data)
 
+    @extend_schema(
+        request=CustomUserSerializer,
+        responses={200: CustomUserSerializer},
+        description="Update current user profile"
+    )
     def patch(self, request):
         serializer = CustomUserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
@@ -138,6 +148,11 @@ class PasswordResetRequestView(APIView):
     """API endpoint for requesting password reset"""
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(
+        request=None,
+        responses={200: {'type': 'object', 'properties': {'message': {'type': 'string'}}}},
+        description="Request password reset"
+    )
     def post(self, request):
         email = request.data.get('email')
         if not email:
@@ -190,6 +205,11 @@ class PasswordResetConfirmView(APIView):
     """API endpoint for confirming password reset with token"""
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(
+        request=None,
+        responses={200: {'type': 'object', 'properties': {'message': {'type': 'string'}}}},
+        description="Confirm password reset"
+    )
     def post(self, request):
         token = request.data.get('token')
         new_password = request.data.get('new_password')
@@ -220,6 +240,10 @@ class UserPreferencesView(APIView):
     """API endpoint for getting and updating user preferences"""
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+        responses={200: UserPreferencesSerializer},
+        description="Get user preferences"
+    )
     def get(self, request):
         from .serializers import UserPreferencesSerializer
         from .models import UserPreferences
@@ -229,6 +253,11 @@ class UserPreferencesView(APIView):
         serializer = UserPreferencesSerializer(preferences)
         return Response(serializer.data)
 
+    @extend_schema(
+        request=UserPreferencesSerializer,
+        responses={200: UserPreferencesSerializer},
+        description="Update user preferences"
+    )
     def put(self, request):
         from .serializers import UserPreferencesSerializer
         from .models import UserPreferences
@@ -249,6 +278,11 @@ class AppwriteLoginView(APIView):
     """
     permission_classes = [permissions.AllowAny]
 
+    @extend_schema(
+        request=None,
+        responses={200: {'type': 'object', 'properties': {'access': {'type': 'string'}, 'refresh': {'type': 'string'}, 'user': CustomUserSerializer}}},
+        description="Login with Appwrite JWT"
+    )
     def post(self, request):
         jwt_token = request.data.get('jwt')
         if not jwt_token:

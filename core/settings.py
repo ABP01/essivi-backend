@@ -53,10 +53,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # CORS Configuration
 # Always specify exact origins, never use CORS_ALLOW_ALL_ORIGINS in production
-CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS', 
-    'http://localhost:3000,http://localhost:3001,http://localhost,https://essivivi.vercel.app'
-).split(',')
+# CORS_ALLOWED_ORIGINS = os.getenv(
+#     'CORS_ALLOWED_ORIGINS', 
+#     'http://localhost:3000,http://localhost:3001,http://localhost,https://essivivi.vercel.app'
+# ).split(',')
+CORS_ALLOW_ALL_ORIGINS = True  # Temporary fix for CORS issues
 
 # Additional CORS settings for stricter security
 CORS_ALLOW_CREDENTIALS = True

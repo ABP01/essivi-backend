@@ -7,12 +7,17 @@ from rest_framework.response import Response
 from django.db import connection
 from django.core.cache import cache
 import logging
+from drf_spectacular.utils import extend_schema
 
 logger = logging.getLogger('apps.dashboard')
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@extend_schema(
+    responses={200: {'type': 'object', 'properties': {'status': {'type': 'string'}, 'services': {'type': 'object'}}}},
+    description="Health check endpoint"
+)
 def health_check(request):
     """
     Health check endpoint for monitoring.
@@ -49,6 +54,10 @@ def health_check(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@extend_schema(
+    responses={200: {'type': 'object', 'properties': {'status': {'type': 'string'}}}},
+    description="Readiness check"
+)
 def readiness_check(request):
     """
     Readiness check for Kubernetes/Docker.
@@ -59,6 +68,10 @@ def readiness_check(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@extend_schema(
+    responses={200: {'type': 'object', 'properties': {'status': {'type': 'string'}}}},
+    description="Liveness check"
+)
 def liveness_check(request):
     """
     Liveness check for Kubernetes/Docker.

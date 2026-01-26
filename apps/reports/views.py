@@ -4,7 +4,12 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
 from datetime import datetime
 from io import BytesIO
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(
+    responses={200: {'type': 'string'}},
+    description="Export report"
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def export_report(request):
@@ -174,6 +179,10 @@ from reportlab.pdfgen import canvas
 class ReportsExportCSVView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        responses={200: {'type': 'string'}},
+        description="Export reports as CSV"
+    )
     def get(self, request):
         # sample data; replace with real query logic
         rows = [
@@ -195,6 +204,10 @@ class ReportsExportCSVView(APIView):
 class ReportsExportExcelView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        responses={200: {'type': 'string'}},
+        description="Export reports as Excel"
+    )
     def get(self, request):
         rows = [
             {"id": 1, "name": "Client A", "orders": 5, "revenue": 10000},
@@ -219,6 +232,10 @@ class ReportsExportExcelView(APIView):
 class ReportsExportPDFView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        responses={200: {'type': 'string'}},
+        description="Export reports as PDF"
+    )
     def get(self, request):
         rows = [
             {"id": 1, "name": "Client A", "orders": 5, "revenue": 10000},

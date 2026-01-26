@@ -107,3 +107,10 @@ INFO 2026-01-26 13:12:02,885 autoreload 29124 26200 Watching for file changes wi
 INFO 2026-01-26 13:44:54,818 autoreload 17896 14172 Watching for file changes with StatReloader
 INFO 2026-01-26 13:46:58,090 autoreload 17896 14172 C:\ProjetIAI\essivi-backend\apps\users\views.py changed, reloading.
 INFO 2026-01-26 13:47:01,001 autoreload 25424 23536 Watching for file changes with StatReloader
+INFO 2026-01-26 22:33:17,582 autoreload 23284 13248 Watching for file changes with StatReloader
+INFO 2026-01-26 22:33:40,000 autoreload 23284 13248 C:\ProjetIAI\essivi-backend\apps\logistics\views.py changed, reloading.
+INFO 2026-01-26 22:34:10,703 autoreload 29396 28152 Watching for file changes with StatReloader
+INFO 2026-01-26 22:39:36,012 autoreload 29396 28152 C:\ProjetIAI\essivi-backend\apps\users\appwrite_views.py changed, reloading.
+INFO 2026-01-26 22:39:39,176 autoreload 17084 3136 Watching for file changes with StatReloader
+INFO 2026-01-26 22:40:50,811 autoreload 17084 3136 C:\ProjetIAI\essivi-backend\core\settings.py changed, reloading.
+INFO 2026-01-26 22:40:54,096 autoreload 27228 27912 Watching for file changes with StatReloader
