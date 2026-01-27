@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import CustomUser, AgentProfile, ClientProfile, UserPreferences
 from drf_spectacular.utils import extend_schema_field, OpenApiTypes
 
@@ -261,3 +262,16 @@ class MeSerializer(CustomUserSerializer):
         except Exception:
             pass
         return None
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['role'] = getattr(user, 'role', 'client')
+        token['username'] = user.username
+        token['is_superuser'] = user.is_superuser
+        token['is_staff'] = user.is_staff
+
+        return token

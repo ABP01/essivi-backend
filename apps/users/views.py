@@ -10,7 +10,7 @@ from django.utils.crypto import get_random_string
 from django.utils import timezone
 from datetime import timedelta
 from .models import CustomUser, AgentProfile, ClientProfile, PasswordResetToken
-from .serializers import CustomUserSerializer, AgentProfileSerializer, ClientProfileSerializer, RegisterSerializer, UserPreferencesSerializer, MeSerializer
+from .serializers import CustomUserSerializer, AgentProfileSerializer, ClientProfileSerializer, RegisterSerializer, UserPreferencesSerializer, MeSerializer, CustomTokenObtainPairSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -331,7 +331,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     in addition to returning the tokens in the JSON body. This helps server-side
     middleware on the frontend domain read auth state reliably.
     """
-    serializer_class = TokenObtainPairSerializer
+    serializer_class = CustomTokenObtainPairSerializer
 
     throttle_classes = [LoginRateThrottle]
 
