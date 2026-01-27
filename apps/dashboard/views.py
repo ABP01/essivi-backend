@@ -43,12 +43,14 @@ class DashboardStatsView(APIView):
         active_tricycles = Tricycle.objects.filter(status='active').count()
 
         # 2. Advanced Metrics
-        delivered_orders = Commande.objects.filter(statut='delivered')
+        # Optimize: Calculate average delivery time entirely in the database
+        avg_diff = Commande.objects.filter(statut='delivered').aggregate(
+            avg=models.Avg(models.F('updated_at') - models.F('created_at'))
+        )['avg']
+        
         avg_delivery_time_minutes = 0
-        if delivered_orders.exists():
-            # Calculate average time in minutes between creation and delivery
-            total_seconds = sum((o.updated_at - o.created_at).total_seconds() for o in delivered_orders)
-            avg_delivery_time_minutes = int((total_seconds / delivered_orders.count()) / 60)
+        if avg_diff:
+            avg_delivery_time_minutes = int(avg_diff.total_seconds() / 60)
 
         # Agent Performance
         agent_perf = AgentProfile.objects.annotate(

@@ -95,10 +95,12 @@ class AgentProfileSerializer(serializers.ModelSerializer):
     firstname = serializers.SerializerMethodField()
     lastname = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    revenue = serializers.SerializerMethodField()
+    totalDeliveries = serializers.SerializerMethodField()
     
     class Meta:
         model = AgentProfile
-        fields = ['id', 'user', 'firstname', 'lastname', 'photo', 'status', 'identification_number', 'tricycle_plate', 'latitude', 'longitude', 'date_embauche', 'tricycle', 'zone_assignee']
+        fields = ['id', 'user', 'firstname', 'lastname', 'photo', 'status', 'identification_number', 'tricycle_plate', 'latitude', 'longitude', 'date_embauche', 'tricycle', 'zone_assignee', 'revenue', 'totalDeliveries']
 
     @extend_schema_field(serializers.CharField())
     def get_firstname(self, obj):
@@ -123,6 +125,28 @@ class AgentProfileSerializer(serializers.ModelSerializer):
             return 'active' if getattr(obj.user, 'is_active', True) else 'inactive'
         except Exception:
             return 'inactive'
+
+    @extend_schema_field(serializers.FloatField())
+    def get_revenue(self, obj):
+        try:
+            return float(obj.solde)
+        except Exception:
+            return 0.0
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_totalDeliveries(self, obj):
+        # Optimize: Check if the value was pre-calculated/annotated in the queryset
+        if hasattr(obj, 'annotated_total_deliveries'):
+            return obj.annotated_total_deliveries
+        if hasattr(obj, 'delivery_count'): # fallback for some views that might name it this way
+            return obj.delivery_count
+            
+        try:
+            from apps.sales.models import Livraison
+            # Fallback to query
+            return Livraison.objects.filter(tournee__agent=obj.user).count()
+        except Exception:
+            return 0
 
     def _extract_name_from_input(self):
         """
