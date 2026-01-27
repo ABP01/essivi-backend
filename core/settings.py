@@ -262,13 +262,13 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
     ],
     'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
+        'core.throttling.HealthExemptAnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/hour',      # Anonymous users: 100 requests/hour
         'user': '1000/hour',     # Authenticated users: 1000 requests/hour
-        'login': '5/minute',     # Login attempts: 5/minute
+        'login': '10/minute',     # Login attempts: 10/minute (increase to reduce false 429)
     }
 }
 

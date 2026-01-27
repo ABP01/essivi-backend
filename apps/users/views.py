@@ -322,6 +322,9 @@ class AppwriteLoginView(APIView):
         })
 
 
+from core.throttling import LoginRateThrottle
+
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     """
     Custom login view that sets HttpOnly cookies for access and refresh tokens
@@ -329,6 +332,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     middleware on the frontend domain read auth state reliably.
     """
     serializer_class = TokenObtainPairSerializer
+
+    throttle_classes = [LoginRateThrottle]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
