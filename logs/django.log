@@ -273,3 +273,6 @@ Traceback (most recent call last):
     ...<2 lines>...
     )
 apps.users.models.CustomUser.preferences.RelatedObjectDoesNotExist: CustomUser has no preferences.
+INFO 2026-01-27 19:04:48,639 autoreload 711312 140408562764736 Watching for file changes with StatReloader
+INFO 2026-01-27 19:06:46,850 autoreload 713881 140334024534976 Watching for file changes with StatReloader
+INFO 2026-01-27 19:10:38,752 autoreload 720263 139713963232192 Watching for file changes with StatReloader
