@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Tricycle, Tournee
 from .models import Tricycle, Tournee, LocationHistory
 from apps.users.models import AgentProfile
+from drf_spectacular.utils import extend_schema_field, OpenApiTypes
 
 class TricycleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,7 +45,8 @@ class AgentPositionSerializer(serializers.ModelSerializer):
                   'is_online', 'last_location_update', 'current_speed', 'heading',
                   'current_deliveries']
     
-    def get_current_deliveries(self, obj):
+    @extend_schema_field(OpenApiTypes.INT)
+    def get_current_deliveries(self, obj) -> int:
         """Compte le nombre de livraisons en cours pour cet agent"""
         from apps.sales.models import Livraison
         return Livraison.objects.filter(

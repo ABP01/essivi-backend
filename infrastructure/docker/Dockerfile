@@ -53,6 +53,9 @@ COPY --from=builder /opt/venv /opt/venv
 
 WORKDIR /app
 
+# Copy project source into container
+COPY . /app
+
 # Create entrypoint script for Render (WSGI with Gunicorn)
 RUN printf '#!/bin/bash\n\
     set -e\n\

@@ -206,6 +206,19 @@ def save_fcm_token(request):
             'push_enabled': True
         })
         
+        # Also save token locally in user's preferences for faster push sending
+        try:
+            prefs = getattr(request.user, 'preferences', None)
+            if prefs is None:
+                from apps.users.models import UserPreferences
+                prefs = UserPreferences.objects.create(user=request.user, fcm_token=fcm_token)
+            else:
+                prefs.fcm_token = fcm_token
+                prefs.save()
+        except Exception:
+            # Non-fatal: log and continue
+            pass
+
         return Response({
             'success': True,
             'message': 'Token FCM sauvegardé avec succès'

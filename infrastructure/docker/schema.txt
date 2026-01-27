@@ -1,0 +1,4125 @@
+openapi: 3.0.3
+info:
+  title: Essivi API
+  version: 1.0.0
+  description: API documentation for Essivi project
+paths:
+  /api/auth/appwrite/health/:
+    get:
+      operationId: api_auth_appwrite_health_retrieve
+      description: Appwrite health check
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+          description: ''
+  /api/auth/appwrite/save-fcm-token/:
+    post:
+      operationId: api_auth_appwrite_save_fcm_token_create
+      description: Save FCM token
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: ''
+  /api/auth/appwrite/send-otp/:
+    post:
+      operationId: api_auth_appwrite_send_otp_create
+      description: Send phone OTP
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: ''
+  /api/auth/appwrite/send-push/:
+    post:
+      operationId: api_auth_appwrite_send_push_create
+      description: Send push notification
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: ''
+  /api/auth/appwrite/user/:
+    get:
+      operationId: api_auth_appwrite_user_retrieve
+      description: Get Appwrite user info
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/auth/appwrite/verify-otp/:
+    post:
+      operationId: api_auth_appwrite_verify_otp_create
+      description: Verify phone OTP
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: ''
+  /api/auth/change-password/:
+    post:
+      operationId: api_auth_change_password_create
+      description: Change user password
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/login/:
+    post:
+      operationId: api_auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: api_auth_logout_create
+      description: Blacklist the refresh token to logout user.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '205':
+          description: No response body
+  /api/auth/me/:
+    get:
+      operationId: api_auth_me_retrieve
+      description: Get current user profile
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+    patch:
+      operationId: api_auth_me_partial_update
+      description: Update current user profile
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+          description: ''
+  /api/auth/signup/:
+    post:
+      operationId: api_auth_signup_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Register'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Register'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/auth/token/refresh/:
+    post:
+      operationId: api_auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/dashboard/stats/:
+    get:
+      operationId: api_dashboard_stats_retrieve
+      description: Get dashboard statistics (count of orders, deliveries, etc.)
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/logistics/agents/{agent_id}/update_location/:
+    post:
+      operationId: api_logistics_agents_update_location_create
+      description: Update agent location
+      parameters:
+      - in: path
+        name: agent_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentLocation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AgentLocation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AgentLocation'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: ''
+  /api/logistics/agents/locations/:
+    get:
+      operationId: api_logistics_agents_locations_list
+      description: Get all agent locations
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentPosition'
+          description: ''
+  /api/logistics/agents/nearest/:
+    post:
+      operationId: api_logistics_agents_nearest_create
+      description: Find nearest agents
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+          description: ''
+  /api/logistics/agents/test_location/:
+    get:
+      operationId: api_logistics_agents_test_location_retrieve
+      description: Test agent location tracking
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/logistics/tournees/:
+    get:
+      operationId: api_logistics_tournees_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTourneeList'
+          description: ''
+    post:
+      operationId: api_logistics_tournees_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tournee'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Tournee'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Tournee'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournee'
+          description: ''
+  /api/logistics/tournees/{id}/:
+    get:
+      operationId: api_logistics_tournees_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tournee.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournee'
+          description: ''
+    put:
+      operationId: api_logistics_tournees_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tournee.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tournee'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Tournee'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Tournee'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournee'
+          description: ''
+    patch:
+      operationId: api_logistics_tournees_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tournee.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTournee'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTournee'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTournee'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournee'
+          description: ''
+    delete:
+      operationId: api_logistics_tournees_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tournee.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/logistics/tricycles/:
+    get:
+      operationId: api_logistics_tricycles_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTricycleList'
+          description: ''
+    post:
+      operationId: api_logistics_tricycles_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tricycle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Tricycle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Tricycle'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tricycle'
+          description: ''
+  /api/logistics/tricycles/{id}/:
+    get:
+      operationId: api_logistics_tricycles_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tricycle.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tricycle'
+          description: ''
+    put:
+      operationId: api_logistics_tricycles_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tricycle.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tricycle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Tricycle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Tricycle'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tricycle'
+          description: ''
+    patch:
+      operationId: api_logistics_tricycles_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tricycle.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTricycle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTricycle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTricycle'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tricycle'
+          description: ''
+    delete:
+      operationId: api_logistics_tricycles_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this tricycle.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/reports/export/:
+    get:
+      operationId: api_reports_export_retrieve
+      description: Export report
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
+  /api/reports/export/csv/:
+    get:
+      operationId: api_reports_export_csv_retrieve
+      description: Export report
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
+  /api/reports/export/excel/:
+    get:
+      operationId: api_reports_export_excel_retrieve
+      description: Export reports as Excel
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
+  /api/reports/export/pdf/:
+    get:
+      operationId: api_reports_export_pdf_retrieve
+      description: Export reports as PDF
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: ''
+  /api/sales/bottle-returns/:
+    get:
+      operationId: api_sales_bottle_returns_list
+      description: ViewSet for bottle return requests
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBottleReturnList'
+          description: ''
+    post:
+      operationId: api_sales_bottle_returns_create
+      description: ViewSet for bottle return requests
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BottleReturn'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BottleReturn'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BottleReturn'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BottleReturn'
+          description: ''
+  /api/sales/bottle-returns/{id}/:
+    get:
+      operationId: api_sales_bottle_returns_retrieve
+      description: ViewSet for bottle return requests
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this bottle return.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BottleReturn'
+          description: ''
+    put:
+      operationId: api_sales_bottle_returns_update
+      description: ViewSet for bottle return requests
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this bottle return.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BottleReturn'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BottleReturn'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BottleReturn'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BottleReturn'
+          description: ''
+    patch:
+      operationId: api_sales_bottle_returns_partial_update
+      description: ViewSet for bottle return requests
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this bottle return.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBottleReturn'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBottleReturn'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBottleReturn'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BottleReturn'
+          description: ''
+    delete:
+      operationId: api_sales_bottle_returns_destroy
+      description: ViewSet for bottle return requests
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this bottle return.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/sales/commandes/:
+    get:
+      operationId: api_sales_commandes_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCommandeList'
+          description: ''
+    post:
+      operationId: api_sales_commandes_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Commande'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Commande'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Commande'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+  /api/sales/commandes/{id}/:
+    get:
+      operationId: api_sales_commandes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this commande.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+    put:
+      operationId: api_sales_commandes_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this commande.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Commande'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Commande'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Commande'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+    patch:
+      operationId: api_sales_commandes_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this commande.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCommande'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCommande'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCommande'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+    delete:
+      operationId: api_sales_commandes_destroy
+      description: Prevent clients from cancelling a commande that already has an
+        agent assigned.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this commande.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/sales/commandes/{id}/assign/:
+    post:
+      operationId: api_sales_commandes_assign_create
+      description: Assign an agent to a command and auto-create Livraison
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this commande.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Commande'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Commande'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Commande'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+  /api/sales/faqs/:
+    get:
+      operationId: api_sales_faqs_list
+      description: ViewSet for FAQs (read-only for clients)
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFAQList'
+          description: ''
+  /api/sales/faqs/{id}/:
+    get:
+      operationId: api_sales_faqs_retrieve
+      description: ViewSet for FAQs (read-only for clients)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this FAQ.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQ'
+          description: ''
+  /api/sales/livraisons/:
+    get:
+      operationId: api_sales_livraisons_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLivraisonList'
+          description: ''
+    post:
+      operationId: api_sales_livraisons_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livraison'
+          description: ''
+  /api/sales/livraisons/{id}/:
+    get:
+      operationId: api_sales_livraisons_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this livraison.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livraison'
+          description: ''
+    put:
+      operationId: api_sales_livraisons_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this livraison.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livraison'
+          description: ''
+    patch:
+      operationId: api_sales_livraisons_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this livraison.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLivraison'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedLivraison'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedLivraison'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livraison'
+          description: ''
+    delete:
+      operationId: api_sales_livraisons_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this livraison.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/sales/livraisons/{id}/submit_proof/:
+    post:
+      operationId: api_sales_livraisons_submit_proof_create
+      description: Submit delivery proof (photo, signature, GPS)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this livraison.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livraison'
+          description: ''
+  /api/sales/livraisons/{id}/update_status/:
+    post:
+      operationId: api_sales_livraisons_update_status_create
+      description: Update delivery status (en_route, arriving, etc.)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this livraison.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Livraison'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livraison'
+          description: ''
+  /api/sales/notifications/:
+    get:
+      operationId: api_sales_notifications_list
+      description: ViewSet for user notifications
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+    post:
+      operationId: api_sales_notifications_create
+      description: ViewSet for user notifications
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/sales/notifications/{id}/:
+    get:
+      operationId: api_sales_notifications_retrieve
+      description: ViewSet for user notifications
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    put:
+      operationId: api_sales_notifications_update
+      description: ViewSet for user notifications
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    patch:
+      operationId: api_sales_notifications_partial_update
+      description: ViewSet for user notifications
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotification'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+    delete:
+      operationId: api_sales_notifications_destroy
+      description: ViewSet for user notifications
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/sales/notifications/{id}/mark_read/:
+    post:
+      operationId: api_sales_notifications_mark_read_create
+      description: Mark a single notification as read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/sales/notifications/mark_all_read/:
+    post:
+      operationId: api_sales_notifications_mark_all_read_create
+      description: Mark all notifications as read for the current user
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/sales/subscriptions/:
+    get:
+      operationId: api_sales_subscriptions_list
+      description: ViewSet for client subscriptions
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubscriptionList'
+          description: ''
+    post:
+      operationId: api_sales_subscriptions_create
+      description: ViewSet for client subscriptions
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/sales/subscriptions/{id}/:
+    get:
+      operationId: api_sales_subscriptions_retrieve
+      description: ViewSet for client subscriptions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+    put:
+      operationId: api_sales_subscriptions_update
+      description: ViewSet for client subscriptions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+    patch:
+      operationId: api_sales_subscriptions_partial_update
+      description: ViewSet for client subscriptions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscription'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+    delete:
+      operationId: api_sales_subscriptions_destroy
+      description: ViewSet for client subscriptions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/sales/subscriptions/{id}/pause/:
+    post:
+      operationId: api_sales_subscriptions_pause_create
+      description: Pause a subscription
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/sales/subscriptions/{id}/resume/:
+    post:
+      operationId: api_sales_subscriptions_resume_create
+      description: Resume a paused subscription
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/token/:
+    post:
+      operationId: api_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: api_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/users/agents/:
+    get:
+      operationId: api_users_agents_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAgentProfileList'
+          description: ''
+    post:
+      operationId: api_users_agents_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AgentProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AgentProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProfile'
+          description: ''
+  /api/users/agents/{id}/:
+    get:
+      operationId: api_users_agents_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this agent profile.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProfile'
+          description: ''
+    put:
+      operationId: api_users_agents_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this agent profile.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AgentProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AgentProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProfile'
+          description: ''
+    patch:
+      operationId: api_users_agents_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this agent profile.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAgentProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAgentProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAgentProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentProfile'
+          description: ''
+    delete:
+      operationId: api_users_agents_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this agent profile.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/users/auth/appwrite-login/:
+    post:
+      operationId: api_users_auth_appwrite_login_create
+      description: Login with Appwrite JWT
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenUser'
+          description: ''
+  /api/users/auth/change-password/:
+    post:
+      operationId: api_users_auth_change_password_create
+      description: Change user password
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/users/auth/login/:
+    post:
+      operationId: api_users_auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/users/auth/logout/:
+    post:
+      operationId: api_users_auth_logout_create
+      description: Blacklist the refresh token to logout user.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '205':
+          description: No response body
+  /api/users/auth/password-reset/:
+    post:
+      operationId: api_users_auth_password_reset_create
+      description: Request password reset
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: ''
+  /api/users/auth/password-reset-confirm/:
+    post:
+      operationId: api_users_auth_password_reset_confirm_create
+      description: Confirm password reset
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: ''
+  /api/users/auth/signup/:
+    post:
+      operationId: api_users_auth_signup_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Register'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Register'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/users/clients/:
+    get:
+      operationId: api_users_clients_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedClientProfileList'
+          description: ''
+    post:
+      operationId: api_users_clients_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClientProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClientProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+          description: ''
+  /api/users/clients/{id}/:
+    get:
+      operationId: api_users_clients_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this client profile.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+          description: ''
+    put:
+      operationId: api_users_clients_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this client profile.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClientProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClientProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+          description: ''
+    patch:
+      operationId: api_users_clients_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this client profile.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedClientProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedClientProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedClientProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+          description: ''
+    delete:
+      operationId: api_users_clients_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this client profile.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/users/me/:
+    get:
+      operationId: api_users_me_retrieve
+      description: Get current user profile
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+    patch:
+      operationId: api_users_me_partial_update
+      description: Update current user profile
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+          description: ''
+  /api/users/preferences/:
+    get:
+      operationId: api_users_preferences_retrieve
+      description: Get user preferences
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+          description: ''
+    put:
+      operationId: api_users_preferences_update
+      description: Update user preferences
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferences'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserPreferences'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserPreferences'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+          description: ''
+  /api/users/users/:
+    get:
+      operationId: api_users_users_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCustomUserList'
+          description: ''
+    post:
+      operationId: api_users_users_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+          description: ''
+  /api/users/users/{id}/:
+    get:
+      operationId: api_users_users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+          description: ''
+    put:
+      operationId: api_users_users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+          description: ''
+    patch:
+      operationId: api_users_users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+          description: ''
+    delete:
+      operationId: api_users_users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /health/:
+    get:
+      operationId: health_retrieve
+      description: Health check endpoint
+      tags:
+      - health
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  services:
+                    type: object
+          description: ''
+  /health/live/:
+    get:
+      operationId: health_live_retrieve
+      description: Liveness check
+      tags:
+      - health
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+          description: ''
+  /health/ready/:
+    get:
+      operationId: health_ready_retrieve
+      description: Readiness check
+      tags:
+      - health
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+          description: ''
+components:
+  schemas:
+    AgentLocation:
+      type: object
+      description: Serializer pour mettre à jour la position d'un agent
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        accuracy:
+          type: number
+          format: double
+          nullable: true
+        speed:
+          type: number
+          format: double
+          nullable: true
+        heading:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - latitude
+      - longitude
+    AgentPosition:
+      type: object
+      description: Serializer pour afficher la position actuelle d'un agent
+      properties:
+        agent_id:
+          type: integer
+          readOnly: true
+        agent_name:
+          type: string
+          readOnly: true
+        agent_phone:
+          type: string
+          readOnly: true
+        latitude:
+          type: number
+          format: double
+          maximum: 90.0
+          minimum: -90.0
+          nullable: true
+          description: Latitude entre -90 et 90
+        longitude:
+          type: number
+          format: double
+          maximum: 180.0
+          minimum: -180.0
+          nullable: true
+          description: Longitude entre -180 et 180
+        is_online:
+          type: boolean
+        last_location_update:
+          type: string
+          format: date-time
+          nullable: true
+        current_speed:
+          type: number
+          format: double
+          nullable: true
+          description: Vitesse en km/h
+        heading:
+          type: number
+          format: double
+          nullable: true
+          description: Direction en degrés (0-360)
+        current_deliveries:
+          type: integer
+          description: Compte le nombre de livraisons en cours pour cet agent
+          readOnly: true
+      required:
+      - agent_id
+      - agent_name
+      - agent_phone
+      - current_deliveries
+    AgentProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/CustomUser'
+          readOnly: true
+        firstname:
+          type: string
+          readOnly: true
+        lastname:
+          type: string
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          type: string
+          readOnly: true
+        identification_number:
+          type: string
+          nullable: true
+          maxLength: 100
+        tricycle_plate:
+          type: string
+          nullable: true
+          maxLength: 50
+        latitude:
+          type: number
+          format: double
+          maximum: 90.0
+          minimum: -90.0
+          nullable: true
+          description: Latitude entre -90 et 90
+        longitude:
+          type: number
+          format: double
+          maximum: 180.0
+          minimum: -180.0
+          nullable: true
+          description: Longitude entre -180 et 180
+        date_embauche:
+          type: string
+          format: date
+          nullable: true
+        tricycle:
+          type: integer
+          nullable: true
+        zone_assignee:
+          type: string
+          maxLength: 100
+      required:
+      - firstname
+      - id
+      - lastname
+      - status
+      - user
+    BottleReturn:
+      type: object
+      description: Serializer for bottle return requests
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        client:
+          type: integer
+        client_name:
+          type: string
+          readOnly: true
+        bottle_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        credit_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/BottleReturnStatusEnum'
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - bottle_count
+      - client
+      - client_name
+      - created_at
+      - credit_amount
+      - id
+      - updated_at
+    BottleReturnStatusEnum:
+      enum:
+      - pending
+      - approved
+      - completed
+      - rejected
+      type: string
+      description: |-
+        * `pending` - En attente
+        * `approved` - Approuvé
+        * `completed` - Complété
+        * `rejected` - Rejeté
+    BottleSizeEnum:
+      enum:
+      - 5L
+      - 10L
+      - 20L
+      type: string
+      description: |-
+        * `5L` - 5 Litres
+        * `10L` - 10 Litres
+        * `20L` - 20 Litres
+    CategoryEnum:
+      enum:
+      - orders
+      - delivery
+      - payment
+      - account
+      - other
+      type: string
+      description: |-
+        * `orders` - Commandes
+        * `delivery` - Livraison
+        * `payment` - Paiement
+        * `account` - Compte
+        * `other` - Autre
+    ClientProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/CustomUser'
+          readOnly: true
+        nom_point_vente:
+          type: string
+          maxLength: 100
+        storeName:
+          type: string
+          readOnly: true
+        nom_proprietaire:
+          type: string
+          nullable: true
+          maxLength: 100
+        ownerName:
+          type: string
+          readOnly: true
+        adresse:
+          type: string
+          nullable: true
+          maxLength: 255
+        address:
+          type: string
+          readOnly: true
+        gps_lat:
+          type: number
+          format: double
+          maximum: 90.0
+          minimum: -90.0
+          nullable: true
+        gps_lng:
+          type: number
+          format: double
+          maximum: 180.0
+          minimum: -180.0
+          nullable: true
+        lat:
+          type: number
+          format: double
+          readOnly: true
+        lng:
+          type: number
+          format: double
+          readOnly: true
+        solde:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - address
+      - id
+      - lat
+      - lng
+      - ownerName
+      - storeName
+      - user
+    Commande:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        client_name:
+          type: string
+          readOnly: true
+        client_phone:
+          type: string
+          readOnly: true
+        agent_name:
+          type: string
+          readOnly: true
+          nullable: true
+        agent_phone:
+          type: string
+          readOnly: true
+          nullable: true
+        agent_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        statut:
+          $ref: '#/components/schemas/StatutEnum'
+        montant:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        date_souhaitee:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        client:
+          type: integer
+        agent:
+          type: integer
+          nullable: true
+      required:
+      - agent_id
+      - agent_name
+      - agent_phone
+      - client
+      - client_name
+      - client_phone
+      - created_at
+      - date_souhaitee
+      - id
+      - updated_at
+    CustomUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 20
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+      required:
+      - id
+      - username
+    FAQ:
+      type: object
+      description: Serializer for FAQs
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question:
+          type: string
+          maxLength: 500
+        answer:
+          type: string
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        is_active:
+          type: boolean
+      required:
+      - answer
+      - id
+      - question
+    LanguageEnum:
+      enum:
+      - fr
+      - en
+      - es
+      type: string
+      description: |-
+        * `fr` - Français
+        * `en` - English
+        * `es` - Español
+    Livraison:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        client_phone:
+          type: string
+          readOnly: true
+        client_name:
+          type: string
+          readOnly: true
+        agent_phone:
+          type: string
+          readOnly: true
+        agent_name:
+          type: string
+          readOnly: true
+        amount:
+          type: number
+          format: double
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        statut_livraison:
+          allOf:
+          - $ref: '#/components/schemas/StatutLivraisonEnum'
+          description: |-
+            Statut de progression de la livraison
+
+            * `assigned` - Assignée
+            * `en_route` - En route
+            * `arriving` - Arrive bientôt
+            * `delivered` - Livrée
+        gps_lat:
+          type: number
+          format: double
+          maximum: 90.0
+          minimum: -90.0
+          nullable: true
+        gps_lng:
+          type: number
+          format: double
+          maximum: 180.0
+          minimum: -180.0
+          nullable: true
+        photo_preuve:
+          type: string
+          format: uri
+          nullable: true
+        signature:
+          type: string
+          format: uri
+          nullable: true
+        preuve_validee:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+        tournee:
+          type: integer
+        commande:
+          type: integer
+          nullable: true
+        client:
+          type: integer
+      required:
+      - address
+      - agent_name
+      - agent_phone
+      - amount
+      - client
+      - client_name
+      - client_phone
+      - id
+      - timestamp
+      - tournee
+    Me:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 20
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        profile:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        preferences:
+          allOf:
+          - $ref: '#/components/schemas/UserPreferences'
+          readOnly: true
+      required:
+      - id
+      - preferences
+      - profile
+      - username
+    Notification:
+      type: object
+      description: Serializer for user notifications
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        message:
+          type: string
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - message
+      - title
+    PaginatedAgentProfileList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentProfile'
+    PaginatedBottleReturnList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BottleReturn'
+    PaginatedClientProfileList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientProfile'
+    PaginatedCommandeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Commande'
+    PaginatedCustomUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomUser'
+    PaginatedFAQList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FAQ'
+    PaginatedLivraisonList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Livraison'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedSubscriptionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+    PaginatedTourneeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tournee'
+    PaginatedTricycleList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tricycle'
+    PatchedAgentProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/CustomUser'
+          readOnly: true
+        firstname:
+          type: string
+          readOnly: true
+        lastname:
+          type: string
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          type: string
+          readOnly: true
+        identification_number:
+          type: string
+          nullable: true
+          maxLength: 100
+        tricycle_plate:
+          type: string
+          nullable: true
+          maxLength: 50
+        latitude:
+          type: number
+          format: double
+          maximum: 90.0
+          minimum: -90.0
+          nullable: true
+          description: Latitude entre -90 et 90
+        longitude:
+          type: number
+          format: double
+          maximum: 180.0
+          minimum: -180.0
+          nullable: true
+          description: Longitude entre -180 et 180
+        date_embauche:
+          type: string
+          format: date
+          nullable: true
+        tricycle:
+          type: integer
+          nullable: true
+        zone_assignee:
+          type: string
+          maxLength: 100
+    PatchedBottleReturn:
+      type: object
+      description: Serializer for bottle return requests
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        client:
+          type: integer
+        client_name:
+          type: string
+          readOnly: true
+        bottle_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        credit_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/BottleReturnStatusEnum'
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedClientProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/CustomUser'
+          readOnly: true
+        nom_point_vente:
+          type: string
+          maxLength: 100
+        storeName:
+          type: string
+          readOnly: true
+        nom_proprietaire:
+          type: string
+          nullable: true
+          maxLength: 100
+        ownerName:
+          type: string
+          readOnly: true
+        adresse:
+          type: string
+          nullable: true
+          maxLength: 255
+        address:
+          type: string
+          readOnly: true
+        gps_lat:
+          type: number
+          format: double
+          maximum: 90.0
+          minimum: -90.0
+          nullable: true
+        gps_lng:
+          type: number
+          format: double
+          maximum: 180.0
+          minimum: -180.0
+          nullable: true
+        lat:
+          type: number
+          format: double
+          readOnly: true
+        lng:
+          type: number
+          format: double
+          readOnly: true
+        solde:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+    PatchedCommande:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        client_name:
+          type: string
+          readOnly: true
+        client_phone:
+          type: string
+          readOnly: true
+        agent_name:
+          type: string
+          readOnly: true
+          nullable: true
+        agent_phone:
+          type: string
+          readOnly: true
+          nullable: true
+        agent_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        statut:
+          $ref: '#/components/schemas/StatutEnum'
+        montant:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        date_souhaitee:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        client:
+          type: integer
+        agent:
+          type: integer
+          nullable: true
+    PatchedCustomUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 20
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+    PatchedLivraison:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        client_phone:
+          type: string
+          readOnly: true
+        client_name:
+          type: string
+          readOnly: true
+        agent_phone:
+          type: string
+          readOnly: true
+        agent_name:
+          type: string
+          readOnly: true
+        amount:
+          type: number
+          format: double
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        statut_livraison:
+          allOf:
+          - $ref: '#/components/schemas/StatutLivraisonEnum'
+          description: |-
+            Statut de progression de la livraison
+
+            * `assigned` - Assignée
+            * `en_route` - En route
+            * `arriving` - Arrive bientôt
+            * `delivered` - Livrée
+        gps_lat:
+          type: number
+          format: double
+          maximum: 90.0
+          minimum: -90.0
+          nullable: true
+        gps_lng:
+          type: number
+          format: double
+          maximum: 180.0
+          minimum: -180.0
+          nullable: true
+        photo_preuve:
+          type: string
+          format: uri
+          nullable: true
+        signature:
+          type: string
+          format: uri
+          nullable: true
+        preuve_validee:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+        tournee:
+          type: integer
+        commande:
+          type: integer
+          nullable: true
+        client:
+          type: integer
+    PatchedNotification:
+      type: object
+      description: Serializer for user notifications
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        message:
+          type: string
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedSubscription:
+      type: object
+      description: Serializer for client subscriptions
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        client:
+          type: integer
+        client_name:
+          type: string
+          readOnly: true
+        plan:
+          $ref: '#/components/schemas/PlanEnum'
+        bottle_size:
+          $ref: '#/components/schemas/BottleSizeEnum'
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        preferred_day:
+          type: string
+          maxLength: 20
+        time_slot:
+          type: string
+          maxLength: 50
+        status:
+          $ref: '#/components/schemas/SubscriptionStatusEnum'
+        next_delivery:
+          type: string
+          format: date
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedTournee:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        date_debut:
+          type: string
+          format: date-time
+        date_fin:
+          type: string
+          format: date-time
+          nullable: true
+        stock_initial:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        stock_retour:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        agent:
+          type: integer
+        tricycle:
+          type: integer
+          nullable: true
+    PatchedTricycle:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        immatriculation:
+          type: string
+          maxLength: 20
+        status:
+          $ref: '#/components/schemas/TricycleStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PlanEnum:
+      enum:
+      - hebdomadaire
+      - bi_mensuel
+      - mensuel
+      type: string
+      description: |-
+        * `hebdomadaire` - Hebdomadaire
+        * `bi_mensuel` - Bi-mensuel
+        * `mensuel` - Mensuel
+    Register:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 20
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+      required:
+      - password
+      - username
+    RoleEnum:
+      enum:
+      - admin
+      - gestionnaire
+      - agent
+      - client
+      type: string
+      description: |-
+        * `admin` - Admin
+        * `gestionnaire` - Gestionnaire
+        * `agent` - Agent
+        * `client` - Client
+    StatutEnum:
+      enum:
+      - pending
+      - validated
+      - delivered
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - En attente
+        * `validated` - Validée
+        * `delivered` - Livrée
+        * `cancelled` - Annulée
+    StatutLivraisonEnum:
+      enum:
+      - assigned
+      - en_route
+      - arriving
+      - delivered
+      type: string
+      description: |-
+        * `assigned` - Assignée
+        * `en_route` - En route
+        * `arriving` - Arrive bientôt
+        * `delivered` - Livrée
+    Subscription:
+      type: object
+      description: Serializer for client subscriptions
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        client:
+          type: integer
+        client_name:
+          type: string
+          readOnly: true
+        plan:
+          $ref: '#/components/schemas/PlanEnum'
+        bottle_size:
+          $ref: '#/components/schemas/BottleSizeEnum'
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        preferred_day:
+          type: string
+          maxLength: 20
+        time_slot:
+          type: string
+          maxLength: 50
+        status:
+          $ref: '#/components/schemas/SubscriptionStatusEnum'
+        next_delivery:
+          type: string
+          format: date
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - client
+      - client_name
+      - created_at
+      - id
+      - updated_at
+    SubscriptionStatusEnum:
+      enum:
+      - active
+      - paused
+      - cancelled
+      type: string
+      description: |-
+        * `active` - Actif
+        * `paused` - En pause
+        * `cancelled` - Annulé
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenUser:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+        user:
+          $ref: '#/components/schemas/CustomUser'
+      required:
+      - access
+      - refresh
+      - user
+    Tournee:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        date_debut:
+          type: string
+          format: date-time
+        date_fin:
+          type: string
+          format: date-time
+          nullable: true
+        stock_initial:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        stock_retour:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        agent:
+          type: integer
+        tricycle:
+          type: integer
+          nullable: true
+      required:
+      - agent
+      - date_debut
+      - id
+    Tricycle:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        immatriculation:
+          type: string
+          maxLength: 20
+        status:
+          $ref: '#/components/schemas/TricycleStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - immatriculation
+    TricycleStatusEnum:
+      enum:
+      - active
+      - maintenance
+      - inactive
+      type: string
+      description: |-
+        * `active` - Actif
+        * `maintenance` - En Maintenance
+        * `inactive` - Inactif
+    TypeEnum:
+      enum:
+      - info
+      - success
+      - warning
+      - error
+      type: string
+      description: |-
+        * `info` - Information
+        * `success` - Success
+        * `warning` - Warning
+        * `error` - Error
+    UserPreferences:
+      type: object
+      description: Serializer for user preferences
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        notifications_enabled:
+          type: boolean
+        email_notifications:
+          type: boolean
+        sms_notifications:
+          type: boolean
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - updated_at
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

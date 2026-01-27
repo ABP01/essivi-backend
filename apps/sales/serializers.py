@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ
+from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ, AgentRating
 from drf_spectacular.utils import extend_schema_field
 
 class CommandeSerializer(serializers.ModelSerializer):
@@ -98,5 +98,16 @@ class FAQSerializer(serializers.ModelSerializer):
         model = FAQ
         fields = ['id', 'question', 'answer', 'category', 'order', 'is_active']
         read_only_fields = ['id']
+
+class AgentRatingSerializer(serializers.ModelSerializer):
+    """Serializer for agent ratings"""
+    client_name = serializers.CharField(source='client.username', read_only=True)
+    agent_name = serializers.CharField(source='agent.username', read_only=True)
+    commande_id = serializers.IntegerField(source='commande.id', read_only=True)
+    
+    class Meta:
+        model = AgentRating
+        fields = ['id', 'client', 'client_name', 'agent', 'agent_name', 'commande', 'commande_id', 'rating', 'comment', 'created_at']
+        read_only_fields = ['id', 'created_at']
 
 

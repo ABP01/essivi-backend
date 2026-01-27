@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import CustomUser, AgentProfile, ClientProfile, UserPreferences
-from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.utils import extend_schema_field, OpenApiTypes
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -247,7 +247,8 @@ class MeSerializer(CustomUserSerializer):
     class Meta(CustomUserSerializer.Meta):
         fields = CustomUserSerializer.Meta.fields + ['profile', 'preferences']
 
-    def get_profile(self, obj):
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_profile(self, obj) -> dict | None:
         try:
             if hasattr(obj, 'role'):
                 if obj.role == 'agent':

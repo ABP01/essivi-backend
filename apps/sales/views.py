@@ -2,7 +2,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ
-from .serializers import CommandeSerializer, LivraisonSerializer, NotificationSerializer, BottleReturnSerializer, SubscriptionSerializer, FAQSerializer
+from .serializers import CommandeSerializer, LivraisonSerializer, NotificationSerializer, BottleReturnSerializer, SubscriptionSerializer, FAQSerializer, AgentRatingSerializer
 import logging
 
 logger = logging.getLogger('apps.sales')
@@ -28,17 +28,11 @@ class CommandeViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def assign(self, request, pk=None):
-        """Assign an agent to a command and auto-create Livraison"""
+        """Assign an agent to a command and auto-create Livraison. If no agent_id provided, assign nearest available agent."""
         from .services import SalesService
         
         commande = self.get_object()
         agent_id = request.data.get('agent_id')
-        
-        if not agent_id:
-            return Response(
-                {'error': 'agent_id is required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         
         try:
             result = SalesService.assign_agent_to_command(commande.id, agent_id)
@@ -54,6 +48,22 @@ class CommandeViewSet(viewsets.ModelViewSet):
                 {'error': f'An error occurred: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    def destroy(self, request, *args, **kwargs):
+        """Prevent clients from cancelling a commande that already has an agent assigned."""
+        instance = self.get_object()
+        user = request.user
+        role = getattr(user, 'role', 'client')
+
+        # Admins and gestionnaires can delete any commande
+        if user.is_superuser or role in ['admin', 'gestionnaire']:
+            return super().destroy(request, *args, **kwargs)
+
+        # If a client is trying to delete and an agent is assigned, forbid
+        if role == 'client' and instance.agent is not None:
+            return Response({'error': 'Commande déjà assignée — annulation impossible.'}, status=status.HTTP_403_FORBIDDEN)
+
+        return super().destroy(request, *args, **kwargs)
 
 
 class LivraisonViewSet(viewsets.ModelViewSet):
@@ -100,8 +110,8 @@ class LivraisonViewSet(viewsets.ModelViewSet):
         if 'photo_preuve' in request.FILES:
             livraison.photo_preuve = request.FILES['photo_preuve']
         
-        # Mark proof as validated and delivered
-        livraison.preuve_validee = True
+        # Mark delivered, but wait for client validation
+        # livraison.preuve_validee = True  <-- Moved to client_validate
         livraison.statut_livraison = 'delivered'
         livraison.save()
         
@@ -126,9 +136,21 @@ class LivraisonViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # Update gps coords if provided by agent
+        if 'gps_lat' in request.data:
+            try:
+                livraison.gps_lat = float(request.data.get('gps_lat'))
+            except Exception:
+                pass
+        if 'gps_lng' in request.data:
+            try:
+                livraison.gps_lng = float(request.data.get('gps_lng'))
+            except Exception:
+                pass
+
         livraison.statut_livraison = new_status
         livraison.save()
-        
+
         # Create notification for client
         from .models import Notification
         status_messages = {
@@ -136,12 +158,51 @@ class LivraisonViewSet(viewsets.ModelViewSet):
             'arriving': 'Votre livreur arrive bientôt !',
             'delivered': 'Votre commande a été livrée !'
         }
-        
+
         if new_status in status_messages:
             Notification.objects.create(
                 user=livraison.client,
                 title='Mise à jour de livraison',
                 message=status_messages[new_status],
+                type='info'
+            )
+        
+        serializer = self.get_serializer(livraison)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def client_validate(self, request, pk=None):
+        """Client validates the delivery after agent submits proof"""
+        livraison = self.get_object()
+        user = self.request.user
+        
+        # Only client can validate their own delivery
+        if livraison.client != user:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+        
+        if livraison.statut_livraison != 'delivered':
+            return Response({'error': 'Delivery not yet completed'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        livraison.preuve_validee = True
+        livraison.save()
+        
+        # Create notification for agent and admins
+        from .models import Notification
+        Notification.objects.create(
+            user=livraison.commande.agent,
+            title='Livraison validée',
+            message=f'Le client a validé la livraison #{livraison.id}.',
+            type='success'
+        )
+        
+        # Admins
+        from apps.users.models import CustomUser
+        admins = CustomUser.objects.filter(role__in=['admin', 'gestionnaire'])
+        for admin in admins:
+            Notification.objects.create(
+                user=admin,
+                title='Livraison validée',
+                message=f'Livraison #{livraison.id} validée par le client.',
                 type='info'
             )
         
@@ -228,5 +289,23 @@ class FAQViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = FAQSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = FAQ.objects.filter(is_active=True)
+
+class AgentRatingViewSet(viewsets.ModelViewSet):
+    """ViewSet for agent ratings by clients"""
+    serializer_class = AgentRatingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        role = getattr(user, 'role', 'client')
+        
+        if user.is_superuser or role in ['admin', 'gestionnaire']:
+            return AgentRating.objects.all()
+        elif role == 'agent':
+            return AgentRating.objects.filter(agent=user)
+        return AgentRating.objects.filter(client=user)
+    
+    def perform_create(self, serializer):
+        serializer.save(client=self.request.user)
 
 

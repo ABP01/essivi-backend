@@ -35,6 +35,14 @@ class RegisterView(generics.CreateAPIView):
 
 from drf_spectacular.utils import extend_schema
 
+from rest_framework import serializers as drf_serializers
+
+# Response serializer for token endpoints combining tokens + user
+class TokenUserSerializer(drf_serializers.Serializer):
+    access = drf_serializers.CharField()
+    refresh = drf_serializers.CharField()
+    user = CustomUserSerializer()
+
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -75,10 +83,14 @@ class AgentProfileViewSet(viewsets.ModelViewSet):
         user = self.request.user
         role = getattr(user, 'role', 'client')
         
+        # Admins and gestionnaires can view all agent profiles
         if user.is_superuser or role in ['admin', 'gestionnaire']:
             return AgentProfile.objects.all()
-        # Clients peuvent voir les profils des agents pour les commandes en cours
-        return AgentProfile.objects.all() # On garde permissif pour l'instant car l'UI en a besoin
+        # Agents can see their own profile
+        if role == 'agent':
+            return AgentProfile.objects.filter(user=user)
+        # Clients and other roles should not see agent list for security
+        return AgentProfile.objects.none()
 
 class ClientProfileViewSet(viewsets.ModelViewSet):
     queryset = ClientProfile.objects.all()  # Requis pour le router DRF
@@ -280,7 +292,7 @@ class AppwriteLoginView(APIView):
 
     @extend_schema(
         request=None,
-        responses={200: {'type': 'object', 'properties': {'access': {'type': 'string'}, 'refresh': {'type': 'string'}, 'user': CustomUserSerializer}}},
+        responses={200: TokenUserSerializer},
         description="Login with Appwrite JWT"
     )
     def post(self, request):

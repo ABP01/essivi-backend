@@ -3,9 +3,10 @@ Service layer for Sales app business logic.
 Separates complex operations from Views.
 """
 import logging
+import math
 from django.utils import timezone
 from django.db import transaction
-from apps.users.models import CustomUser
+from apps.users.models import CustomUser, AgentProfile
 from apps.logistics.models import Tournee
 from .models import Commande, Livraison, Notification
 
@@ -16,8 +17,42 @@ class SalesService:
     """Service class for Sales-related business logic."""
 
     @staticmethod
+    def calculate_distance(lat1, lon1, lat2, lon2):
+        """Calculate distance between two points using Haversine formula (in km)"""
+        R = 6371  # Earth radius in km
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        return R * c
+
+    @staticmethod
+    def find_nearest_agent(client_lat, client_lng):
+        """Find the nearest available agent to the client location"""
+        agents = AgentProfile.objects.filter(
+            user__role='agent',
+            latitude__isnull=False,
+            longitude__isnull=False,
+            is_online=True
+        ).select_related('user')
+        
+        nearest_agent = None
+        min_distance = float('inf')
+        
+        for agent_profile in agents:
+            distance = SalesService.calculate_distance(
+                client_lat, client_lng,
+                agent_profile.latitude, agent_profile.longitude
+            )
+            if distance < min_distance:
+                min_distance = distance
+                nearest_agent = agent_profile.user
+        
+        return nearest_agent, min_distance
+
+    @staticmethod
     @transaction.atomic
-    def assign_agent_to_command(commande_id: int, agent_id: int) -> dict:
+    def assign_agent_to_command(commande_id: int, agent_id: int = None) -> dict:
         """
         Assign an agent to a command and auto-create Livraison and Tournee.
         
@@ -36,10 +71,24 @@ class SalesService:
         except Commande.DoesNotExist:
             raise ValueError(f'Command {commande_id} not found')
         
-        try:
-            agent = CustomUser.objects.get(id=agent_id, role='agent')
-        except CustomUser.DoesNotExist:
-            raise ValueError(f'Agent {agent_id} not found or user is not an agent')
+        if agent_id:
+            try:
+                agent = CustomUser.objects.get(id=agent_id, role='agent')
+            except CustomUser.DoesNotExist:
+                raise ValueError(f'Agent {agent_id} not found or user is not an agent')
+        else:
+            # Find nearest agent
+            if not hasattr(commande.client, 'client_profile') or not commande.client.client_profile.gps_lat or not commande.client.client_profile.gps_lng:
+                raise ValueError('Client location not available for automatic assignment')
+            
+            agent, distance = SalesService.find_nearest_agent(
+                commande.client.client_profile.gps_lat,
+                commande.client.client_profile.gps_lng
+            )
+            if not agent:
+                raise ValueError('No available agents found')
+            if distance > 10:  # Max 10km
+                raise ValueError(f'No agents within 10km (nearest is {distance:.1f}km away)')
         
         # Update command
         commande.agent = agent

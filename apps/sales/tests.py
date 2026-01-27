@@ -4,6 +4,7 @@ Unit tests for Sales Service layer.
 import pytest
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from apps.sales.services import SalesService
 from apps.sales.models import Commande, Livraison
 from apps.logistics.models import Tournee

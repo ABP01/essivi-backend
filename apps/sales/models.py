@@ -186,4 +186,23 @@ class FAQ(models.Model):
     def __str__(self):
         return self.question
 
+class AgentRating(models.Model):
+    """Client ratings and feedback for delivery agents"""
+    client = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, related_name='agent_ratings')
+    agent = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, related_name='received_ratings')
+    commande = models.ForeignKey(Commande, on_delete=models.CASCADE, related_name='agent_ratings')
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Rating from 1 to 5 stars"
+    )
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['client', 'commande']  # One rating per client per order
+    
+    def __str__(self):
+        return f"Rating {self.rating}/5 by {self.client} for {self.agent}"
+
 

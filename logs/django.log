@@ -125,3 +125,151 @@ INFO 2026-01-26 23:18:30,785 autoreload 29724 24600 C:\ProjetIAI\essivi-backend\
 INFO 2026-01-26 23:18:38,503 autoreload 2576 29672 Watching for file changes with StatReloader
 INFO 2026-01-26 23:26:23,026 autoreload 2576 29672 C:\ProjetIAI\essivi-backend\apps\users\serializers.py changed, reloading.
 INFO 2026-01-26 23:26:29,692 autoreload 25824 29032 Watching for file changes with StatReloader
+ERROR 2026-01-27 10:51:03,163 signals 3320 22824 Failed to send push for commande assigned 1
+Traceback (most recent call last):
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 516, in __get__
+    rel_obj = self.related.get_cached_value(instance)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\mixins.py", line 37, in get_cached_value
+    return instance._state.fields_cache[self.cache_name]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'preferences'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: users_userpreferences.fcm_token
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\ProjetIAI\essivi-backend\apps\sales\signals.py", line 31, in sales_post_save
+    token = getattr(instance.agent.preferences, 'fcm_token', None)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 523, in __get__
+    rel_obj = self.get_queryset(instance=instance).get(**filter_args)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 631, in get
+    num = len(clone)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 368, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: users_userpreferences.fcm_token
+ERROR 2026-01-27 10:51:03,407 signals 3320 22824 Failed to send push for commande delivered 1
+Traceback (most recent call last):
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 516, in __get__
+    rel_obj = self.related.get_cached_value(instance)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\mixins.py", line 37, in get_cached_value
+    return instance._state.fields_cache[self.cache_name]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'preferences'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: users_userpreferences.fcm_token
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\ProjetIAI\essivi-backend\apps\sales\signals.py", line 46, in sales_post_save
+    token = getattr(instance.client.preferences, 'fcm_token', None)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 523, in __get__
+    rel_obj = self.get_queryset(instance=instance).get(**filter_args)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 631, in get
+    num = len(clone)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 368, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: users_userpreferences.fcm_token
+ERROR 2026-01-27 10:52:04,715 signals 22632 19084 Failed to send push for commande assigned 1
+Traceback (most recent call last):
+  File "c:\ProjetIAI\essivi-backend\apps\sales\signals.py", line 31, in sales_post_save
+    token = getattr(instance.agent.preferences, 'fcm_token', None)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 534, in __get__
+    raise self.RelatedObjectDoesNotExist(
+    ...<2 lines>...
+    )
+apps.users.models.CustomUser.preferences.RelatedObjectDoesNotExist: CustomUser has no preferences.
+ERROR 2026-01-27 10:52:04,718 signals 22632 19084 Failed to send push for commande delivered 1
+Traceback (most recent call last):
+  File "c:\ProjetIAI\essivi-backend\apps\sales\signals.py", line 46, in sales_post_save
+    token = getattr(instance.client.preferences, 'fcm_token', None)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 534, in __get__
+    raise self.RelatedObjectDoesNotExist(
+    ...<2 lines>...
+    )
+apps.users.models.CustomUser.preferences.RelatedObjectDoesNotExist: CustomUser has no preferences.

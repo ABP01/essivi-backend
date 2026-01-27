@@ -27,6 +27,14 @@ class AgentProfile(models.Model):
     tricycle = models.ForeignKey('logistics.Tricycle', on_delete=models.SET_NULL, null=True, blank=True)
     zone_assignee = models.CharField(max_length=100, blank=True)
 
+    # Wallet/earnings for agent (in FCFA). Use DecimalField to avoid float issues.
+    solde = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        validators=[MinValueValidator(0, message="Solde cannot be negative")]
+    )
+
     def save(self, *args, **kwargs):
         if self.photo and not self.photo.name.endswith('.webp'):
             self.photo = compress_image(self.photo)
@@ -103,6 +111,7 @@ class UserPreferences(models.Model):
     notifications_enabled = models.BooleanField(default=True)
     email_notifications = models.BooleanField(default=True)
     sms_notifications = models.BooleanField(default=False)
+    fcm_token = models.CharField(max_length=255, null=True, blank=True, help_text='Device FCM token for push notifications')
     language = models.CharField(max_length=10, default='fr', choices=[
         ('fr', 'Français'),
         ('en', 'English'),
