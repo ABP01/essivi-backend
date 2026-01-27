@@ -2,6 +2,8 @@ from rest_framework import viewsets, permissions, generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.crypto import get_random_string
@@ -318,4 +320,56 @@ class AppwriteLoginView(APIView):
             'refresh': str(refresh),
             'user': CustomUserSerializer(user).data
         })
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """
+    Custom login view that sets HttpOnly cookies for access and refresh tokens
+    in addition to returning the tokens in the JSON body. This helps server-side
+    middleware on the frontend domain read auth state reliably.
+    """
+    serializer_class = TokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        access = data.get('access')
+        refresh = data.get('refresh')
+
+        # Build response with tokens (same shape as original view)
+        response = Response({
+            'access': access,
+            'refresh': refresh,
+        })
+
+        # Set cookies so Next.js middleware can read them on incoming requests
+        try:
+            secure_flag = not settings.DEBUG
+            # Access token short-lived (8 hours)
+            response.set_cookie(
+                'access_token',
+                access,
+                max_age=8 * 60 * 60,
+                path='/',
+                secure=secure_flag,
+                httponly=True,
+                samesite='None' if secure_flag else 'Lax'
+            )
+            # Refresh token longer (7 days)
+            response.set_cookie(
+                'refresh_token',
+                refresh,
+                max_age=7 * 24 * 60 * 60,
+                path='/',
+                secure=secure_flag,
+                httponly=True,
+                samesite='None' if secure_flag else 'Lax'
+            )
+        except Exception as e:
+            # If cookie setting fails for any reason, continue returning tokens
+            print(f"Failed to set auth cookies: {e}")
+
+        return response
 
