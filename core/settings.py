@@ -15,6 +15,7 @@ import os
 import sys
 from datetime import timedelta
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 
@@ -152,18 +153,20 @@ if DEBUG:
     }
 else:
     # Redis for production
-    redis_host = os.getenv('REDIS_HOST', 'localhost')
-    redis_port = os.getenv('REDIS_PORT', '6379')
-    redis_user = os.getenv('REDIS_USERNAME', '')
-    redis_pass = os.getenv('REDIS_PASSWORD', '')
-    
-    # Construct the Redis URL
-    # format: redis://[[username]:[password]@]host[:port][/db]
-    auth_str = ""
-    if redis_user or redis_pass:
-        auth_str = f"{redis_user}:{redis_pass}@"
-    
-    redis_url = f"redis://{auth_str}{redis_host}:{redis_port}/0"
+    redis_url = os.getenv('REDIS_URL')
+    if not redis_url:
+        redis_host = os.getenv('REDIS_HOST', 'localhost')
+        redis_port = os.getenv('REDIS_PORT', '6379')
+        redis_user = os.getenv('REDIS_USERNAME', '')
+        redis_pass = os.getenv('REDIS_PASSWORD', '')
+        
+        # Construct the Redis URL
+        # format: redis://[[username]:[password]@]host[:port][/db]
+        auth_str = ""
+        if redis_user or redis_pass:
+            auth_str = f"{redis_user}:{redis_pass}@"
+        
+        redis_url = f"redis://{auth_str}{redis_host}:{redis_port}/0"
 
     CHANNEL_LAYERS = {
         'default': {
@@ -189,6 +192,10 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
+
+# Override with DATABASE_URL if provided (for production deployments like Render)
+if os.getenv('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.config(default=os.getenv('DATABASE_URL'))
 
 # Test Database Configuration
 if 'test' in sys.argv:

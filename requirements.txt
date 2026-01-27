@@ -22,4 +22,5 @@ appwrite==14.1.0
 firebase-admin==6.5.0
 requests==2.32.4
 django-prometheus==2.3.1
+dj-database-url==2.2.0
 
