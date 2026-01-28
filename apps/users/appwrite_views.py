@@ -192,19 +192,23 @@ def save_fcm_token(request):
     
     try:
         # Sauvegarder le token dans les préférences utilisateur Appwrite
-        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-        jwt_token = auth_header.replace('Bearer ', '')
-        
-        client = Client()
-        client.set_endpoint(os.getenv('APPWRITE_ENDPOINT'))
-        client.set_project(os.getenv('APPWRITE_PROJECT_ID'))
-        client.set_jwt(jwt_token)
-        
-        account = Account(client)
-        account.update_prefs(prefs={
-            'fcm_token': fcm_token,
-            'push_enabled': True
-        })
+        try:
+            auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+            jwt_token = auth_header.replace('Bearer ', '')
+            
+            client = Client()
+            client.set_endpoint(os.getenv('APPWRITE_ENDPOINT'))
+            client.set_project(os.getenv('APPWRITE_PROJECT_ID'))
+            client.set_jwt(jwt_token)
+            
+            account = Account(client)
+            account.update_prefs(prefs={
+                'fcm_token': fcm_token,
+                'push_enabled': True
+            })
+        except Exception:
+            # Appwrite save failed, continue with local save
+            pass
         
         # Also save token locally in user's preferences for faster push sending
         try:

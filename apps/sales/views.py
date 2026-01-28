@@ -41,6 +41,10 @@ class CommandeViewSet(viewsets.ModelViewSet):
             return base_queryset.filter(agent=user)
         return base_queryset.filter(client=user)
     
+    def perform_create(self, serializer):
+        """Set the client to the current user for security."""
+        serializer.save(client=self.request.user)
+    
     
     @action(detail=True, methods=['post'])
     def assign(self, request, pk=None):
