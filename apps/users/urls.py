@@ -1,12 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .views import CustomUserViewSet, AgentProfileViewSet, ClientProfileViewSet, RegisterView, LogoutView, MeView, ChangePasswordView, UserPreferencesView, PasswordResetRequestView, PasswordResetConfirmView, AppwriteLoginView
+from .views import CustomUserViewSet, AgentProfileViewSet, ClientProfileViewSet, RegisterView, LogoutView, MeView, ChangePasswordView, UserPreferencesView, PasswordResetRequestView, PasswordResetConfirmView, AppwriteLoginView, RechargeWalletView
+
 
 router = DefaultRouter()
 router.register(r'users', CustomUserViewSet)
 router.register(r'agents', AgentProfileViewSet)
 router.register(r'clients', ClientProfileViewSet)
+
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -18,6 +20,7 @@ urlpatterns = [
     path('auth/change-password/', ChangePasswordView.as_view(), name='change_password'),
     path('auth/password-reset/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('auth/password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('wallet/recharge/', RechargeWalletView.as_view(), name='wallet_recharge'),
     path('preferences/', UserPreferencesView.as_view(), name='user_preferences'),
 ]
 

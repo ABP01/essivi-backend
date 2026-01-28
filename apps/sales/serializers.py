@@ -1,6 +1,29 @@
 from rest_framework import serializers
-from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ, AgentRating
+from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ, AgentRating, Product, OrderItem
 from drf_spectacular.utils import extend_schema_field
+
+class ProductSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+    @extend_schema_field(serializers.CharField())
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_category = serializers.CharField(source='product.category', read_only=True)
+    product_unit = serializers.CharField(source='product.unit', read_only=True)
+    product_quantity_per_unit = serializers.IntegerField(source='product.quantity_per_unit', read_only=True)
+
+    class Meta:
+        model = OrderItem
+        fields = '__all__'
 
 class CommandeSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='client.username', read_only=True)
@@ -8,6 +31,7 @@ class CommandeSerializer(serializers.ModelSerializer):
     agent_name = serializers.CharField(source='agent.username', read_only=True, allow_null=True)
     agent_phone = serializers.CharField(source='agent.phone_number', read_only=True, allow_null=True)
     agent_id = serializers.IntegerField(source='agent.id', read_only=True, allow_null=True)
+    items = OrderItemSerializer(many=True, read_only=True)
     
     class Meta:
         model = Commande

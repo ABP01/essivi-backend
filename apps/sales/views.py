@@ -1,11 +1,27 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ
-from .serializers import CommandeSerializer, LivraisonSerializer, NotificationSerializer, BottleReturnSerializer, SubscriptionSerializer, FAQSerializer, AgentRatingSerializer
+from .models import Commande, Livraison, Notification, BottleReturn, Subscription, FAQ, Product, OrderItem
+from .serializers import CommandeSerializer, LivraisonSerializer, NotificationSerializer, BottleReturnSerializer, SubscriptionSerializer, FAQSerializer, AgentRatingSerializer, ProductSerializer, OrderItemSerializer
 import logging
 
 logger = logging.getLogger('apps.sales')
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.filter(is_active=True)
+    serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        role = getattr(user, 'role', 'client')
+        
+        # Admins and gestionnaires can see all products
+        if user.is_superuser or role in ['admin', 'gestionnaire']:
+            return Product.objects.all()
+        
+        # Others only see active products
+        return Product.objects.filter(is_active=True)
 
 class CommandeViewSet(viewsets.ModelViewSet):
     queryset = Commande.objects.select_related('agent', 'client').all()

@@ -378,3 +378,37 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
         return response
 
+
+class RechargeWalletView(APIView):
+    """
+    API endpoint to recharge client wallet (Simulation)
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        request={'application/json': {'type': 'object', 'properties': {'amount': {'type': 'number'}}}},
+        responses={200: {'type': 'object', 'properties': {'message': {'type': 'string'}, 'new_balance': {'type': 'number'}}}},
+        description="Recharge wallet with amount"
+    )
+    def post(self, request):
+        amount = request.data.get('amount')
+        if not amount:
+            return Response({'error': 'Amount is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            amount = float(amount)
+            if amount <= 0:
+                raise ValueError
+        except ValueError:
+            return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            profile = ClientProfile.objects.get(user=request.user)
+            profile.solde += amount
+            profile.save()
+            return Response({
+                'message': 'Solde rechargé avec succès',
+                'new_balance': profile.solde
+            })
+        except ClientProfile.DoesNotExist:
+            return Response({'error': 'Client profile not found'}, status=status.HTTP_404_NOT_FOUND)

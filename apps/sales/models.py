@@ -1,6 +1,62 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+class Product(models.Model):
+    CATEGORY_CHOICES = (
+        ('water', 'Eau'),
+        ('drink', 'Boisson'),
+        ('other', 'Autre'),
+    )
+
+    UNIT_CHOICES = (
+        ('sachet', 'Sachet'),
+        ('bottle', 'Bouteille'),
+        ('pack', 'Pack'),
+        ('case', 'Caisse'),
+    )
+
+    name = models.CharField(max_length=100, unique=True, help_text="Nom du produit")
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='water')
+    unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='sachet')
+    quantity_per_unit = models.IntegerField(default=1, help_text="Quantité par unité (ex: 12 pour un pack de 12)")
+    price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Prix en FCFA")
+    description = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    image = models.ImageField(upload_to='products/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Produit'
+        verbose_name_plural = 'Produits'
+
+    def __str__(self):
+        return f"{self.name} ({self.quantity_per_unit} x {self.unit}) - {self.price} FCFA"
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image.name.endswith('.webp'):
+            self.image = compress_image(self.image)
+        super().save(*args, **kwargs)
+
+class OrderItem(models.Model):
+    commande = models.ForeignKey('Commande', on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(1)])
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        verbose_name = 'Article de commande'
+        verbose_name_plural = 'Articles de commande'
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name} - {self.total_price} FCFA"
+
+    def save(self, *args, **kwargs):
+        self.total_price = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
 class Commande(models.Model):
     STATUS_CHOICES = (
         ('pending', 'En attente'),
@@ -20,6 +76,16 @@ class Commande(models.Model):
 
     def __str__(self):
         return f"Commande {self.id} - {self.client}"
+
+    @property
+    def total_amount(self):
+        """Calculate total from order items"""
+        return sum(item.total_price for item in self.items.all())
+
+    def update_total_amount(self):
+        """Update the montant field based on order items"""
+        self.montant = self.total_amount
+        self.save(update_fields=['montant'])
 
 from core.utils.images import compress_image
 
