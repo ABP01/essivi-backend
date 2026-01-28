@@ -43,13 +43,8 @@ class CommandeViewSet(viewsets.ModelViewSet):
     
     def create(self, request, *args, **kwargs):
         """Override create to handle client assignment securely."""
-        # Remove client from request data to prevent spoofing
-        data = request.data.copy()
-        if 'client' in data:
-            data.pop('client')
-        
-        # Validate the data
-        serializer = self.get_serializer(data=data)
+        # Data is validated by serializer, client is set here
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         # Save with authenticated user as client

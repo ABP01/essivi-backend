@@ -32,6 +32,12 @@ class CommandeSerializer(serializers.ModelSerializer):
     agent_phone = serializers.SerializerMethodField()
     agent_id = serializers.SerializerMethodField()
     items = OrderItemSerializer(many=True, read_only=True)
+    items_data = serializers.ListField(
+        child=serializers.DictField(),
+        write_only=True,
+        required=False,
+        help_text="List of items to create with the order"
+    )
     
     def get_agent_name(self, obj):
         return obj.agent.username if obj.agent else None
@@ -42,9 +48,33 @@ class CommandeSerializer(serializers.ModelSerializer):
     def get_agent_id(self, obj):
         return obj.agent.id if obj.agent else None
     
+    def create(self, validated_data):
+        items_data = validated_data.pop('items_data', [])
+        commande = super().create(validated_data)
+        
+        # Create order items
+        for item_data in items_data:
+            product_id = item_data.get('product')
+            quantity = item_data.get('quantity', 1)
+            try:
+                product = Product.objects.get(id=product_id)
+                OrderItem.objects.create(
+                    commande=commande,
+                    product=product,
+                    quantity=quantity,
+                    unit_price=product.price
+                )
+            except Product.DoesNotExist:
+                pass  # Skip invalid products
+        
+        # Update total amount
+        commande.update_total_amount()
+        return commande
+    
     class Meta:
         model = Commande
         fields = '__all__'
+        read_only_fields = ['client', 'agent', 'statut', 'montant', 'created_at', 'updated_at']
 
 class LivraisonSerializer(serializers.ModelSerializer):
     client_phone = serializers.CharField(source='client.phone_number', read_only=True)
