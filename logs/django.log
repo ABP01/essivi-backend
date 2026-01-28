@@ -286,3 +286,15 @@ INFO 2026-01-28 13:01:35,062 autoreload 21564 20184 Watching for file changes wi
 INFO 2026-01-28 13:01:39,133 autoreload 21564 20184 C:\ProjetIAI\essivi-backend\apps\users\urls.py changed, reloading.
 INFO 2026-01-28 13:01:41,341 autoreload 12732 24728 Watching for file changes with StatReloader
 INFO 2026-01-28 13:02:28,584 autoreload 18268 12200 Watching for file changes with StatReloader
+INFO 2026-01-28 13:36:34,768 autoreload 9816 12504 Watching for file changes with StatReloader
+ERROR 2026-01-28 13:37:03,613 log 30312 30904 Invalid HTTP_HOST header: 'testserver'. You may need to add 'testserver' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\utils\deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "C:\Users\komla\AppData\Roaming\Python\Python313\site-packages\django\http\request.py", line 202, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'testserver'. You may need to add 'testserver' to ALLOWED_HOSTS.

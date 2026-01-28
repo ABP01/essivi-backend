@@ -50,6 +50,6 @@ class AgentPositionSerializer(serializers.ModelSerializer):
         """Compte le nombre de livraisons en cours pour cet agent"""
         from apps.sales.models import Livraison
         return Livraison.objects.filter(
-            agent=obj.user,
+            tournee__agent=obj.user,
             preuve_validee=False
         ).count()
