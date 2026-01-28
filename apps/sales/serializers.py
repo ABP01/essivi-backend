@@ -28,10 +28,19 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class CommandeSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='client.username', read_only=True)
     client_phone = serializers.CharField(source='client.phone_number', read_only=True)
-    agent_name = serializers.CharField(source='agent.username', read_only=True, allow_null=True)
-    agent_phone = serializers.CharField(source='agent.phone_number', read_only=True, allow_null=True)
-    agent_id = serializers.IntegerField(source='agent.id', read_only=True, allow_null=True)
+    agent_name = serializers.SerializerMethodField()
+    agent_phone = serializers.SerializerMethodField()
+    agent_id = serializers.SerializerMethodField()
     items = OrderItemSerializer(many=True, read_only=True)
+    
+    def get_agent_name(self, obj):
+        return obj.agent.username if obj.agent else None
+    
+    def get_agent_phone(self, obj):
+        return obj.agent.phone_number if obj.agent else None
+    
+    def get_agent_id(self, obj):
+        return obj.agent.id if obj.agent else None
     
     class Meta:
         model = Commande
