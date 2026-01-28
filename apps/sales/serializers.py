@@ -48,8 +48,13 @@ class CommandeSerializer(serializers.ModelSerializer):
     def get_agent_id(self, obj):
         return obj.agent.id if obj.agent else None
     
-    def create(self, validated_data):
+    def create(self, validated_data, **kwargs):
         items_data = validated_data.pop('items_data', [])
+        # Get client from kwargs if provided
+        client = kwargs.get('client')
+        if client:
+            validated_data['client'] = client
+        
         commande = super().create(validated_data)
         
         # Create order items
