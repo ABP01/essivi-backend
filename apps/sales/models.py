@@ -71,6 +71,18 @@ class Commande(models.Model):
     statut = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     montant = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     date_souhaitee = models.DateTimeField()
+    delivery_latitude = models.FloatField(
+        null=True, 
+        blank=True,
+        validators=[MinValueValidator(-90.0), MaxValueValidator(90.0)],
+        help_text="Latitude du lieu de livraison souhaité"
+    )
+    delivery_longitude = models.FloatField(
+        null=True, 
+        blank=True,
+        validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)],
+        help_text="Longitude du lieu de livraison souhaité"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
