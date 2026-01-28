@@ -1,0 +1,10 @@
+ALLOWED_HOSTS_DEBUG: ['api.localhost', 'localhost', '127.0.0.1', '0.0.0.0', 'essivi-backend.onrender.com']
+--- Starting Debug ---
+Using Client: armelbp (ID: 7)
+Using Product: Cristallin (ID: 7)
+Testing Serializer with data: {'items_data': [{'product': 7, 'quantity': 4}], 'delivery_latitude': 6.1256632, 'delivery_longitude': 1.2101405, 'date_souhaitee': '2026-01-28T15:30:48.629401+00:00'}
+Serializer is valid.
+Attempting to save...
+SUCCESS! Commande created: ID 2
+Total Amount: 10000.00
+Items count: 1
