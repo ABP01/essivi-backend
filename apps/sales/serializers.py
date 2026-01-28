@@ -45,6 +45,7 @@ class CommandeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Commande
         fields = '__all__'
+        read_only_fields = ['client']
 
 class LivraisonSerializer(serializers.ModelSerializer):
     client_phone = serializers.CharField(source='client.phone_number', read_only=True)
