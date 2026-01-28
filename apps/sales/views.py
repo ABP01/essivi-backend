@@ -46,7 +46,7 @@ class CommandeViewSet(viewsets.ModelViewSet):
         serializer.save(client=self.request.user)
     
     def create(self, request, *args, **kwargs):
-        """Override create to remove client from data since it's read-only."""
+        """Override create to remove client from data since it's handled in serializer."""
         data = request.data.copy()
         data.pop('client', None)
         serializer = self.get_serializer(data=data)

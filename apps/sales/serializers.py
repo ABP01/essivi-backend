@@ -42,10 +42,16 @@ class CommandeSerializer(serializers.ModelSerializer):
     def get_agent_id(self, obj):
         return obj.agent.id if obj.agent else None
     
+    def create(self, validated_data):
+        # Remove client from validated_data if present, will be set in view
+        validated_data.pop('client', None)
+        # Create instance without client, will be set in view
+        instance = self.Meta.model(**validated_data)
+        return instance
+    
     class Meta:
         model = Commande
         fields = '__all__'
-        read_only_fields = ['client']
 
 class LivraisonSerializer(serializers.ModelSerializer):
     client_phone = serializers.CharField(source='client.phone_number', read_only=True)
